@@ -11,141 +11,168 @@ class LoginView extends StatefulWidget {
 class _LoginViewState extends State<LoginView> {
   final controller = LoginController();
 
+  // --- COMPONENTE PADRONIZADO DE INPUT ---
+  Widget _buildInputGroup({
+    required String label,
+    required String hint,
+    required Function(String) onChanged,
+    bool isPassword = false,
+    TextInputType keyboardType = TextInputType.text,
+    Widget? suffixIcon,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Label fixo acima do input
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+            color: Colors.black87,
+          ),
+        ),
+        const SizedBox(height: 8),
+        // Campo de texto padronizado
+        SizedBox(
+          height: 56, // Altura padrão de inputs modernos
+          child: TextField(
+            onChanged: onChanged,
+            obscureText: isPassword,
+            keyboardType: keyboardType,
+            cursorColor: const Color(0xFF2196F3),
+            decoration: InputDecoration(
+              hintText: hint,
+              hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 15),
+              filled: true,
+              fillColor: Colors.grey.shade50,
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+              suffixIcon: suffixIcon,
+              // Bordas consistentes
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: Colors.grey.shade300),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(color: Color(0xFF2196F3), width: 1.5),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    const primaryColor = Color(0xFF2196F3); // Azul do logo
+    const primaryColor = Color(0xFF2196F3);
 
     return Scaffold(
       backgroundColor: Colors.white,
       body: ListenableBuilder(
         listenable: controller,
         builder: (context, child) {
-          return Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 30.0),
+          return SafeArea(
             child: Center(
               child: SingleChildScrollView(
+                padding: const EdgeInsets.all(30.0),
                 child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    // Logo Gymoraly
+                    // LOGO E TÍTULO
+                    const Icon(Icons.fitness_center, size: 50, color: primaryColor),
+                    const SizedBox(height: 10),
                     const Text(
                       'Gymoraly',
                       style: TextStyle(
-                        fontSize: 42,
-                        fontWeight: FontWeight.bold,
+                        fontSize: 32,
+                        fontWeight: FontWeight.w900,
                         color: primaryColor,
-                      ),
-                    ),
-                    const SizedBox(height: 30),
-                    const Text(
-                      'Bem-vindo(a) de volta!',
-                      style: TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black87,
+                        letterSpacing: -0.5,
                       ),
                     ),
                     const SizedBox(height: 40),
 
-                    // Input E-mail
-                    TextField(
+                    // INPUT E-MAIL
+                    _buildInputGroup(
+                      label: 'E-mail',
+                      hint: 'exemplo@email.com',
+                      keyboardType: TextInputType.emailAddress,
                       onChanged: (value) => controller.model.email = value,
-                      decoration: InputDecoration(
-                        hintText: 'E-mail',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                          borderSide: BorderSide(color: Colors.grey.shade300),
+                    ),
+                    const SizedBox(height: 20),
+
+                    // INPUT SENHA
+                    _buildInputGroup(
+                      label: 'Senha',
+                      hint: '••••••••',
+                      isPassword: !controller.isPasswordVisible,
+                      onChanged: (value) => controller.model.password = value,
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          controller.isPasswordVisible
+                              ? Icons.visibility_rounded
+                              : Icons.visibility_off_rounded,
+                          color: Colors.grey,
+                          size: 20,
                         ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                          borderSide: BorderSide(color: Colors.grey.shade300),
+                        onPressed: controller.togglePasswordVisibility,
+                      ),
+                    ),
+
+                    // ESQUECI SENHA
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: TextButton(
+                        onPressed: () {},
+                        child: Text(
+                          'Esqueci minha senha',
+                          style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
                         ),
                       ),
                     ),
                     const SizedBox(height: 20),
 
-                    // Input Senha
-                    TextField(
-                      onChanged: (value) => controller.model.password = value,
-                      obscureText: !controller.isPasswordVisible,
-                      decoration: InputDecoration(
-                        hintText: 'Senha',
-                        suffixIcon: IconButton(
-                          icon: Icon(
-                            controller.isPasswordVisible
-                                ? Icons.visibility
-                                : Icons.visibility_off_outlined,
-                            color: Colors.grey,
-                          ),
-                          onPressed: controller.togglePasswordVisibility,
-                        ),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                          borderSide: BorderSide(color: Colors.grey.shade300),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                          borderSide: BorderSide(color: Colors.grey.shade300),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 30),
-
-                    // Botão Entrar
+                    // BOTÃO ENTRAR PADRONIZADO
                     SizedBox(
                       width: double.infinity,
-                      height: 55,
+                      height: 56, 
                       child: ElevatedButton(
                         onPressed: controller.isLoading
                             ? null
                             : () => controller.login(context),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: primaryColor,
+                          foregroundColor: Colors.white,
+                          elevation: 0,
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
+                            borderRadius: BorderRadius.circular(12),
                           ),
                         ),
                         child: controller.isLoading
-                            ? const CircularProgressIndicator(
-                                color: Colors.white,
+                            ? const SizedBox(
+                                height: 20,
+                                width: 20,
+                                child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
                               )
                             : const Text(
                                 'Entrar',
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                ),
+                                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                               ),
                       ),
                     ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 32),
 
-                    TextButton(
-                      onPressed: () {},
-                      child: const Text(
-                        'Esqueci minha senha',
-                        style: TextStyle(color: Colors.grey),
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-
-                    // Rodapé: Criar conta
+                    // RODAPÉ
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Text('Ainda não tem conta? '),
-                        GestureDetector(
-                          onTap: () {
-                            // O correto para GestureDetector é onTap
-                            print("Ir para tela de cadastro");
-                          },
+                        Text('Ainda não tem conta? ', style: TextStyle(color: Colors.grey.shade600)),
+                        InkWell(
+                          onTap: () {},
                           child: const Text(
                             'Crie uma conta',
-                            style: TextStyle(
-                              color: primaryColor,
-                              fontWeight: FontWeight.bold,
-                            ),
+                            style: TextStyle(color: primaryColor, fontWeight: FontWeight.bold),
                           ),
                         ),
                       ],
