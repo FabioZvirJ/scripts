@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gymoraly/views/register_view.dart';
 import '../controllers/login_controller.dart';
 
 class LoginView extends StatefulWidget {
@@ -55,7 +56,10 @@ class _LoginViewState extends State<LoginView> {
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(color: Color(0xFF2196F3), width: 1.5),
+                borderSide: const BorderSide(
+                  color: Color(0xFF2196F3),
+                  width: 1.5,
+                ),
               ),
             ),
           ),
@@ -80,7 +84,11 @@ class _LoginViewState extends State<LoginView> {
                 child: Column(
                   children: [
                     // LOGO E TÍTULO
-                    const Icon(Icons.fitness_center, size: 50, color: primaryColor),
+                    const Icon(
+                      Icons.fitness_center,
+                      size: 50,
+                      color: primaryColor,
+                    ),
                     const SizedBox(height: 10),
                     const Text(
                       'Gymoraly',
@@ -127,7 +135,10 @@ class _LoginViewState extends State<LoginView> {
                         onPressed: () {},
                         child: Text(
                           'Esqueci minha senha',
-                          style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
+                          style: TextStyle(
+                            color: Colors.grey.shade600,
+                            fontSize: 13,
+                          ),
                         ),
                       ),
                     ),
@@ -136,7 +147,7 @@ class _LoginViewState extends State<LoginView> {
                     // BOTÃO ENTRAR PADRONIZADO
                     SizedBox(
                       width: double.infinity,
-                      height: 56, 
+                      height: 56,
                       child: ElevatedButton(
                         onPressed: controller.isLoading
                             ? null
@@ -153,11 +164,17 @@ class _LoginViewState extends State<LoginView> {
                             ? const SizedBox(
                                 height: 20,
                                 width: 20,
-                                child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                                child: CircularProgressIndicator(
+                                  color: Colors.white,
+                                  strokeWidth: 2,
+                                ),
                               )
                             : const Text(
                                 'Entrar',
-                                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                       ),
                     ),
@@ -167,12 +184,26 @@ class _LoginViewState extends State<LoginView> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Text('Ainda não tem conta? ', style: TextStyle(color: Colors.grey.shade600)),
+                        Text(
+                          'Ainda não tem conta? ',
+                          style: TextStyle(color: Colors.grey.shade600),
+                        ),
+                        // No login_view.dart
                         InkWell(
-                          onTap: () {},
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const RegisterView(),
+                              ),
+                            );
+                          },
                           child: const Text(
                             'Crie uma conta',
-                            style: TextStyle(color: primaryColor, fontWeight: FontWeight.bold),
+                            style: TextStyle(
+                              color: primaryColor,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
                       ],
