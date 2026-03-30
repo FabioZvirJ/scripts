@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
-import '../models/login_model.dart';
+// Verifique se os caminhos abaixo batem com as suas pastas
+import '../models/login_model.dart'; 
+import '../models/user_model.dart';
+import '../services/database_helper.dart';
 
 class LoginController extends ChangeNotifier {
-  final model = LoginModel();
+  // Você PRECISA dessa linha para que o método login reconheça o "model"
+  final LoginModel model = LoginModel();
+  
   bool isPasswordVisible = false;
   bool isLoading = false;
 
@@ -12,23 +17,52 @@ class LoginController extends ChangeNotifier {
   }
 
   Future<void> login(BuildContext context) async {
-    if (model.isValid) {
-      isLoading = true;
-      notifyListeners();
+    // 1. Inicia o loading
+    isLoading = true;
+    notifyListeners();
 
-      // Simulação de login
-      await Future.delayed(const Duration(seconds: 2));
-      
+    try {
+      // 2. Busca no SQLite usando os dados do model
+      final User? user = await DatabaseHelper().loginUser(
+        model.email, 
+        model.password
+      );
+
+      // 3. Para o loading
       isLoading = false;
       notifyListeners();
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Login realizado com sucesso!')),
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('E-mail ou senha inválidos.')),
-      );
+      // 4. Verifica se o contexto ainda é válido (boa prática em Flutter)
+      if (!context.mounted) return;
+
+      if (user != null) {
+        // LOGIN SUCESSO
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Bem-vindo, ${user.name}!'),
+            backgroundColor: Colors.blue,
+          ),
+        );
+        
+        // TODO: Navigator.pushReplacement para a sua tela Home aqui
+      } else {
+        // LOGIN FALHOU
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('E-mail ou senha incorretos.'),
+            backgroundColor: Colors.redAccent,
+          ),
+        );
+      }
+    } catch (e) {
+      // TRATAMENTO DE ERRO DE BANCO
+      isLoading = false;
+      notifyListeners();
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Erro no banco de dados: $e')),
+        );
+      }
     }
   }
 }
