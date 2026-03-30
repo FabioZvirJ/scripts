@@ -17,6 +17,7 @@ dependencies:
   # --- BANCO DE DADOS INTERNO ---
   sqflite: ^2.3.0    # Motor do SQLite para Flutter
   path: ^1.9.0       # Utilitário para encontrar o caminho das pastas no celular
+  sqflite_common_ffi: ^2.3.0
 
 dev_dependencies:
   flutter_test:
