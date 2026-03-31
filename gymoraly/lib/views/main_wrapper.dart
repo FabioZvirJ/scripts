@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gymoraly/views/community_view.dart';
 import 'home_view.dart';
 import 'progress_view.dart';
 
@@ -19,7 +20,7 @@ class _MainWrapperState extends State<MainWrapper> {
     final List<Widget> _pages = [
       HomeView(userName: widget.userName), // Índice 0
       const ProgressView(),               // Índice 1
-      const Center(child: Text("Comunidade")), 
+      const CommunityView(),
       const Center(child: Text("Perfil")),
     ];
 
