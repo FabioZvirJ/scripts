@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:ui'; // IMPORTANTE: Necessário para o PointerDeviceKind
 import '../widgets/step_progress_indicator.dart';
+import 'gender_view.dart'; // <-- IMPORTANTE: Importando a tela do Passo 3!
 
 class AgeView extends StatefulWidget {
   const AgeView({super.key});
@@ -201,7 +202,10 @@ class _AgeViewState extends State<AgeView> {
                   Expanded(
                     child: ElevatedButton(
                       onPressed: () {
-                        // Navegue para o Passo 3 aqui
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const GenderView()),
+                        );
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: primaryColor,
