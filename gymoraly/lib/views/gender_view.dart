@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:gymoraly/views/physical_data_view.dart';
 import '../widgets/step_progress_indicator.dart';
 // Lembre-se de importar a próxima tela do Passo 4 quando for criá-la
-// import 'physical_data_view.dart'; 
+// import 'physical_data_view.dart';
 
 class GenderView extends StatefulWidget {
   const GenderView({super.key});
@@ -13,7 +14,8 @@ class GenderView extends StatefulWidget {
 class _GenderViewState extends State<GenderView> {
   // Variável para controlar qual opção está selecionada
   // Usaremos 'male', 'female' ou null (nenhum selecionado inicialmente)
-  String? selectedGender = 'male'; // Iniciando com masculino selecionado como na print
+  String? selectedGender =
+      'male'; // Iniciando com masculino selecionado como na print
 
   // Widget construtor para os botões de gênero
   Widget _buildGenderCard({
@@ -37,7 +39,9 @@ class _GenderViewState extends State<GenderView> {
             color: isSelected ? const Color(0xFFE3F2FD) : Colors.white,
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: isSelected ? const Color(0xFF2196F3) : Colors.grey.shade300,
+              color: isSelected
+                  ? const Color(0xFF2196F3)
+                  : Colors.grey.shade300,
               width: isSelected ? 2.0 : 1.0,
             ),
           ),
@@ -83,7 +87,11 @@ class _GenderViewState extends State<GenderView> {
               shape: BoxShape.circle,
             ),
             child: IconButton(
-              icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black, size: 18),
+              icon: const Icon(
+                Icons.arrow_back_ios_new,
+                color: Colors.black,
+                size: 18,
+              ),
               padding: const EdgeInsets.only(right: 2),
               onPressed: () => Navigator.pop(context),
             ),
@@ -103,7 +111,11 @@ class _GenderViewState extends State<GenderView> {
               // Título
               const Text(
                 'Seu Sexo',
-                style: TextStyle(fontSize: 26, fontWeight: FontWeight.w900, color: Colors.black87),
+                style: TextStyle(
+                  fontSize: 26,
+                  fontWeight: FontWeight.w900,
+                  color: Colors.black87,
+                ),
               ),
               const SizedBox(height: 50),
 
@@ -118,7 +130,6 @@ class _GenderViewState extends State<GenderView> {
                     genderValue: 'male',
                   ),
                   const SizedBox(width: 20), // Espaçamento entre os cards
-                  
                   // Card Feminino
                   _buildGenderCard(
                     title: 'Feminino',
@@ -128,9 +139,8 @@ class _GenderViewState extends State<GenderView> {
                   ),
                 ],
               ),
-              
-              const Spacer(), // Empurra os botões para baixo
 
+              const Spacer(), // Empurra os botões para baixo
               // Botões de Rodapé
               Row(
                 children: [
@@ -143,34 +153,48 @@ class _GenderViewState extends State<GenderView> {
                         foregroundColor: Colors.black87,
                         elevation: 0,
                         padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
-                      child: const Text('Anterior', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                      child: const Text(
+                        'Anterior',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ),
                   ),
                   const SizedBox(width: 16),
-                  
+
                   // Botão Próximo
                   Expanded(
                     child: ElevatedButton(
-                      // Desabilita o botão se nenhuma opção for selecionada
-                      onPressed: selectedGender == null 
-                        ? null 
-                        : () {
-                            // Imprimir valor apenas para teste
-                            // print('Sexo selecionado: $selectedGender');
-                            
-                            // Navegar para o passo 4 (ainda vamos criar)
-                            // Navigator.push(context, MaterialPageRoute(builder: (context) => const PhysicalDataView()));
-                          },
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const PhysicalDataView(),
+                          ),
+                        );
+                      },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: primaryColor,
                         foregroundColor: Colors.white,
                         elevation: 0,
                         padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
-                      child: const Text('Próximo', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                      child: const Text(
+                        'Próximo',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ),
                   ),
                 ],
