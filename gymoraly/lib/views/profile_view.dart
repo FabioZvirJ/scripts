@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:gymoraly/views/edit_profile_view.dart';
 import '../controllers/profile_controller.dart'; // Importe o seu controller
 
 class ProfileView extends StatelessWidget {
   final String userName;
-  
+
   // Instancia o controller para gerenciar o logout
   final controller = ProfileController();
 
@@ -28,7 +29,9 @@ class ProfileView extends StatelessWidget {
                   width: double.infinity,
                   decoration: const BoxDecoration(
                     color: primaryColor,
-                    borderRadius: BorderRadius.vertical(bottom: Radius.circular(30)),
+                    borderRadius: BorderRadius.vertical(
+                      bottom: Radius.circular(30),
+                    ),
                   ),
                   padding: const EdgeInsets.only(top: 60, left: 25),
                   child: const Text(
@@ -52,14 +55,18 @@ class ProfileView extends StatelessWidget {
                     child: CircleAvatar(
                       radius: 60,
                       backgroundColor: Colors.grey.shade200,
-                      child: const Icon(Icons.person, size: 60, color: primaryColor),
+                      child: const Icon(
+                        Icons.person,
+                        size: 60,
+                        color: primaryColor,
+                      ),
                     ),
                   ),
                 ),
               ],
             ),
 
-            const SizedBox(height: 70), 
+            const SizedBox(height: 70),
 
             // --- NOME E INFO ---
             Text(
@@ -71,13 +78,16 @@ class ProfileView extends StatelessWidget {
               style: TextStyle(color: Colors.grey, fontSize: 16),
             ),
             const SizedBox(height: 15),
-            
+
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Icon(Icons.location_on, color: Colors.grey.shade400, size: 16),
                 const SizedBox(width: 5),
-                const Text('São Paulo, Brasil', style: TextStyle(color: Colors.grey)),
+                const Text(
+                  'São Paulo, Brasil',
+                  style: TextStyle(color: Colors.grey),
+                ),
               ],
             ),
             const SizedBox(height: 30),
@@ -86,19 +96,32 @@ class ProfileView extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 40),
               child: SizedBox(
-                width: double.infinity,
-                height: 55,
+                width:
+                    double.infinity, // Faz o botão ocupar a largura disponível
+                height: 55, // Altura padrão do seu design
                 child: ElevatedButton(
                   onPressed: () {
-                    // Lógica para editar perfil
+                    // Navega para a tela de edição
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const EditProfileView(),
+                      ),
+                    );
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: primaryColor,
+                    backgroundColor:
+                        primaryColor, // Sua cor principal definida no projeto
                     foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15),
+                    ),
                     elevation: 0,
                   ),
-                  child: const Text('Editar perfil', style: TextStyle(fontWeight: FontWeight.bold)),
+                  child: const Text(
+                    'Editar perfil',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  ),
                 ),
               ),
             ),
@@ -106,31 +129,31 @@ class ProfileView extends StatelessWidget {
 
             // --- OPÇÕES DE MENU ---
             _buildProfileOption(
-              Icons.lock_outline, 
-              'Privacidade', 
+              Icons.lock_outline,
+              'Privacidade',
               onTap: () => print("Privacidade clicada"),
             ),
             _buildProfileOption(
-              Icons.credit_card_rounded, 
-              'Assinaturas', 
+              Icons.credit_card_rounded,
+              'Assinaturas',
               onTap: () => print("Assinaturas clicada"),
             ),
             _buildProfileOption(
-              Icons.settings_outlined, 
-              'Configurações', 
+              Icons.settings_outlined,
+              'Configurações',
               onTap: () => print("Configurações clicada"),
             ),
-            
+
             // Botão Sair
             _buildProfileOption(
-              Icons.logout, 
-              'Sair', 
+              Icons.logout,
+              'Sair',
               textColor: Colors.redAccent,
               onTap: () {
                 _showLogoutDialog(context);
               },
             ),
-            
+
             const SizedBox(height: 40),
           ],
         ),
@@ -144,7 +167,9 @@ class ProfileView extends StatelessWidget {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Sair'),
-        content: const Text('Deseja realmente encerrar sua sessão no Gymoraly?'),
+        content: const Text(
+          'Deseja realmente encerrar sua sessão no Gymoraly?',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -153,9 +178,14 @@ class ProfileView extends StatelessWidget {
           TextButton(
             onPressed: () {
               Navigator.pop(context); // Fecha o diálogo
-              controller.logout(context); // Chama o método de logout no controller
+              controller.logout(
+                context,
+              ); // Chama o método de logout no controller
             },
-            child: const Text('Sair', style: TextStyle(color: Colors.redAccent)),
+            child: const Text(
+              'Sair',
+              style: TextStyle(color: Colors.redAccent),
+            ),
           ),
         ],
       ),
@@ -164,10 +194,11 @@ class ProfileView extends StatelessWidget {
 
   // Widget auxiliar para os cards de opções
   Widget _buildProfileOption(
-    IconData icon, 
-    String title, 
-    {Color? textColor, required VoidCallback onTap}
-  ) {
+    IconData icon,
+    String title, {
+    Color? textColor,
+    required VoidCallback onTap,
+  }) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 8),
       child: Container(
@@ -179,7 +210,7 @@ class ProfileView extends StatelessWidget {
               color: Colors.black.withOpacity(0.03),
               blurRadius: 10,
               offset: const Offset(0, 5),
-            )
+            ),
           ],
         ),
         child: ListTile(
@@ -192,7 +223,11 @@ class ProfileView extends StatelessWidget {
               color: textColor ?? Colors.black87,
             ),
           ),
-          trailing: const Icon(Icons.arrow_forward_ios, size: 14, color: Colors.grey),
+          trailing: const Icon(
+            Icons.arrow_forward_ios,
+            size: 14,
+            color: Colors.grey,
+          ),
         ),
       ),
     );
