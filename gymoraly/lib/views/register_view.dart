@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../controllers/register_controller.dart';
-// Lembre-se de importar o novo componente que criamos acima!
-import '../widgets/step_progress_indicator.dart'; 
+import '../widgets/step_progress_indicator.dart';
+import '../views/age_view.dart'; // <-- IMPORTANTE: Importe a AgeView aqui! (Ajuste o caminho se necessário)
 
 class RegisterView extends StatefulWidget {
   const RegisterView({super.key});
@@ -91,7 +91,6 @@ class _RegisterViewState extends State<RegisterView> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Usando o novo componente reutilizável!
                   const Center(
                     child: StepProgressIndicator(currentStep: 1),
                   ),
@@ -156,7 +155,18 @@ class _RegisterViewState extends State<RegisterView> {
                     width: double.infinity,
                     height: 56,
                     child: ElevatedButton(
-                      onPressed: controller.isLoading ? null : () => controller.register(context),
+                      // <-- NAVEGAÇÃO ADICIONADA AQUI
+                      onPressed: controller.isLoading 
+                          ? null 
+                          : () {
+                              // Se precisar salvar algo no controller antes de mudar de tela, chame aqui.
+                              // Ex: controller.salvarDados();
+                              
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (context) => const AgeView()),
+                              );
+                            },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: primaryColor,
                         foregroundColor: Colors.white,
