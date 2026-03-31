@@ -156,17 +156,21 @@ class _RegisterViewState extends State<RegisterView> {
                     height: 56,
                     child: ElevatedButton(
                       // <-- NAVEGAÇÃO ADICIONADA AQUI
-                      onPressed: controller.isLoading 
-                          ? null 
-                          : () {
-                              // Se precisar salvar algo no controller antes de mudar de tela, chame aqui.
-                              // Ex: controller.salvarDados();
-                              
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(builder: (context) => const AgeView()),
-                              );
-                            },
+onPressed: () {
+  if (controller.model.isStep1Valid) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        // Passando o controller para a AgeView!
+        builder: (context) => AgeView(controller: controller), 
+      ),
+    );
+  } else {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Preencha os dados de acesso corretamente.')),
+    );
+  }
+},
                       style: ElevatedButton.styleFrom(
                         backgroundColor: primaryColor,
                         foregroundColor: Colors.white,

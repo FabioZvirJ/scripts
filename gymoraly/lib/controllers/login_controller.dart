@@ -3,8 +3,8 @@ import 'package:gymoraly/views/main_wrapper.dart';
 // Verifique se os caminhos abaixo batem com as suas pastas
 import '../models/login_model.dart';
 import '../models/user_model.dart';
-import '../services/database_helper.dart';
-import '../views/home_view.dart';
+
+import '../services/database_helper.dart' hide User; 
 
 class LoginController extends ChangeNotifier {
   // Você PRECISA dessa linha para que o método login reconheça o "model"
@@ -47,7 +47,7 @@ class LoginController extends ChangeNotifier {
           ),
         );
 
-        // TODO: Navigator.pushReplacement para a sua tela Home aqui
+
       } else {
         // LOGIN FALHOU
         ScaffoldMessenger.of(context).showSnackBar(

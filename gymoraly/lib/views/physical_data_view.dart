@@ -1,16 +1,34 @@
 import 'package:flutter/material.dart';
 import '../widgets/step_progress_indicator.dart';
+import '../controllers/register_controller.dart'; 
 
 class PhysicalDataView extends StatefulWidget {
-  const PhysicalDataView({super.key});
+  final RegisterController controller; // Recebe o controller com os dados dos passos 1, 2 e 3
+  
+  const PhysicalDataView({super.key, required this.controller});
 
   @override
   State<PhysicalDataView> createState() => _PhysicalDataViewState();
 }
 
 class _PhysicalDataViewState extends State<PhysicalDataView> {
-  final TextEditingController _heightController = TextEditingController();
-  final TextEditingController _weightController = TextEditingController();
+  final TextEditingController _heightController = TextEditingController(text: '175');
+  final TextEditingController _weightController = TextEditingController(text: '70');
+
+  double _currentHeight = 175.0;
+
+  @override
+  void initState() {
+    super.initState();
+    _heightController.addListener(() {
+      final value = double.tryParse(_heightController.text);
+      if (value != null && value >= 100 && value <= 250) {
+        setState(() {
+          _currentHeight = value;
+        });
+      }
+    });
+  }
 
   @override
   void dispose() {
@@ -19,10 +37,9 @@ class _PhysicalDataViewState extends State<PhysicalDataView> {
     super.dispose();
   }
 
-  // Input atualizado para ocupar a tela toda, igualzinho ao Passo 1
-  Widget _buildInputGroup({
+  // CORREÇÃO: Adicionado o "return" com a estrutura do campo de texto
+  Widget _buildSmallInput({
     required String label,
-    required String hint,
     required TextEditingController controller,
   }) {
     return Column(
@@ -30,31 +47,24 @@ class _PhysicalDataViewState extends State<PhysicalDataView> {
       children: [
         Text(
           label,
-          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.black87),
+          style: const TextStyle(
+            fontSize: 16, 
+            fontWeight: FontWeight.bold, 
+            color: Colors.black54
+          ),
         ),
         const SizedBox(height: 8),
-        SizedBox(
-          height: 56,
-          width: double.infinity, // Ocupa a largura toda
-          child: TextField(
-            controller: controller,
-            keyboardType: TextInputType.number,
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-            decoration: InputDecoration(
-              hintText: hint,
-              hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 15),
-              filled: true,
-              fillColor: Colors.grey.shade50,
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: Colors.grey.shade300),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(color: Color(0xFF2196F3), width: 1.5),
-              ),
+        TextField(
+          controller: controller,
+          keyboardType: TextInputType.number,
+          decoration: InputDecoration(
+            filled: true,
+            fillColor: Colors.grey.shade100,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide.none,
             ),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
           ),
         ),
       ],
@@ -70,92 +80,93 @@ class _PhysicalDataViewState extends State<PhysicalDataView> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
-        leadingWidth: 64,
-        leading: Padding(
-          padding: const EdgeInsets.only(left: 16.0, top: 8.0, bottom: 8.0),
-          child: Container(
-            decoration: BoxDecoration(
-              color: Colors.grey.shade100,
-              shape: BoxShape.circle,
-            ),
-            child: IconButton(
-              icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black, size: 18),
-              padding: const EdgeInsets.only(right: 2),
-              onPressed: () => Navigator.pop(context),
-            ),
-          ),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.black87),
+          onPressed: () => Navigator.pop(context),
         ),
       ),
-      body: SafeArea(
-        // SingleChildScrollView resolve o problema de overflow de tela!
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 30.0, vertical: 10.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Center(child: StepProgressIndicator(currentStep: 4)),
-              const SizedBox(height: 30),
-
-              const Text(
-                'Seus Dados\nAtuais',
-                style: TextStyle(fontSize: 28, fontWeight: FontWeight.w900, color: Colors.black87, height: 1.2),
-              ),
-              const SizedBox(height: 40),
-
-              _buildInputGroup(
-                label: 'Altura (cm)',
-                hint: 'Ex: 175',
-                controller: _heightController,
-              ),
-              const SizedBox(height: 20),
-              
-              _buildInputGroup(
-                label: 'Peso (kg)',
-                hint: 'Ex: 70',
-                controller: _weightController,
-              ),
-
-              // Espaço grande para jogar os botões para baixo visualmente
-              const SizedBox(height: 80), 
-
-              Row(
+      // Envolvemos o body no ListenableBuilder para mostrar o Loading circular do botão
+      body: ListenableBuilder(
+        listenable: widget.controller,
+        builder: (context, child) {
+          return SafeArea(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 30.0, vertical: 10.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: () => Navigator.pop(context),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.grey.shade200,
-                        foregroundColor: Colors.black87,
-                        elevation: 0,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      ),
-                      child: const Text('Anterior', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                    ),
+                  const Center(child: StepProgressIndicator(currentStep: 4)),
+                  const SizedBox(height: 30),
+
+                  const Text(
+                    'Seus Dados\nAtuais',
+                    style: TextStyle(fontSize: 28, fontWeight: FontWeight.w900, color: Colors.black87, height: 1.2),
                   ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: () {
-                        // Ação de Cadastrar
-                        // print("Altura: ${_heightController.text}, Peso: ${_weightController.text}");
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: primaryColor,
-                        foregroundColor: Colors.white,
-                        elevation: 0,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      ),
-                      child: const Text('Cadastrar', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                    ),
+                  const SizedBox(height: 40),
+
+                  _buildSmallInput(
+                    label: 'Altura (cm)',
+                    controller: _heightController,
                   ),
+                  const SizedBox(height: 20),
+                  
+                  _buildSmallInput(
+                    label: 'Peso (kg)',
+                    controller: _weightController,
+                  ),
+
+                  const SizedBox(height: 80), 
+
+                  Row(
+                    children: [
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () => Navigator.pop(context),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.grey.shade200,
+                            foregroundColor: Colors.black87,
+                            elevation: 0,
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          ),
+                          child: const Text('Anterior', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      
+                      // BOTAO CADASTRAR FINAL AQUI!
+                      Expanded(
+                        child: ElevatedButton(
+                          // Se estiver carregando (isLoading), desabilita o botão (null)
+                          onPressed: widget.controller.isLoading ? null : () {
+                            // 1. Salva a altura e peso do Passo 4 no model do Controller
+                            widget.controller.model.height = double.tryParse(_heightController.text) ?? 0.0;
+                            widget.controller.model.weight = double.tryParse(_weightController.text) ?? 0.0;
+                            
+                            // 2. Dispara a função de registro (que vai salvar no SQLite)
+                            widget.controller.register(context);
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: primaryColor,
+                            foregroundColor: Colors.white,
+                            elevation: 0,
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          ),
+                          // Mostra o loading ou o texto
+                          child: widget.controller.isLoading 
+                            ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                            : const Text('Cadastrar', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
                 ],
               ),
-              const SizedBox(height: 20),
-            ],
-          ),
-        ),
+            ),
+          );
+        }
       ),
     );
   }

@@ -17,13 +17,14 @@ class RegisterController extends ChangeNotifier {
   }
 
   Future<void> register(BuildContext context) async {
-    // 1. Validação básica (definida no RegisterModel)
+    // 1. Validação básica (agora definida no RegisterModel)
     if (model.isValid) {
       isLoading = true;
       notifyListeners();
 
       try {
         // 2. Criar o objeto de usuário para o banco de dados
+        // Como age, gender, etc. são opcionais agora, isso não dará erro!
         final newUser = User(
           name: model.name,
           email: model.email,
@@ -44,10 +45,10 @@ class RegisterController extends ChangeNotifier {
               backgroundColor: Colors.green,
             ),
           );
-          Navigator.pop(context); // Volta para a tela de login
+          Navigator.of(context).popUntil((route) => route.isFirst);
         }
       } catch (e) {
-        // Trata erros de banco de dados (ex: e-mail duplicado)
+        // Trata erros de banco de dados
         isLoading = false;
         notifyListeners();
         if (context.mounted) {
@@ -59,7 +60,7 @@ class RegisterController extends ChangeNotifier {
     } else {
       // Caso o model.isValid retorne false
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Preencha os campos corretamente.')),
+        const SnackBar(content: Text('Preencha os campos corretamente (e-mail válido e senha com min. 6 caracteres).')),
       );
     }
   }

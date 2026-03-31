@@ -1,6 +1,7 @@
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
-import '../models/user_model.dart';
+// ADD THIS IMPORT: Point it to where your actual user_model.dart is located
+import 'package:gymoraly/models/user_model.dart'; 
 
 class DatabaseHelper {
   static final DatabaseHelper _instance = DatabaseHelper._internal();
@@ -20,16 +21,46 @@ class DatabaseHelper {
     String path = join(await getDatabasesPath(), 'gymoraly.db');
     return await openDatabase(
       path,
-      version: 1,
+      version: 2, 
       onCreate: (db, version) {
         return db.execute(
-          'CREATE TABLE users(id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, email TEXT, password TEXT)',
+          '''
+          CREATE TABLE users(
+            id INTEGER PRIMARY KEY AUTOINCREMENT, 
+            name TEXT, 
+            email TEXT, 
+            password TEXT,
+            age INTEGER,
+            gender TEXT,
+            height REAL,
+            weight REAL
+          )
+          ''',
         );
+      },
+      onUpgrade: (db, oldVersion, newVersion) {
+        if (oldVersion < 2) {
+          db.execute('DROP TABLE IF EXISTS users');
+          db.execute(
+            '''
+            CREATE TABLE users(
+              id INTEGER PRIMARY KEY AUTOINCREMENT, 
+              name TEXT, 
+              email TEXT, 
+              password TEXT,
+              age INTEGER,
+              gender TEXT,
+              height REAL,
+              weight REAL
+            )
+            ''',
+          );
+        }
       },
     );
   }
 
-  // Inserir Usuário (Cadastro)
+  // Inserir Usuário (Cadastro Final)
   Future<int> registerUser(User user) async {
     final db = await database;
     return await db.insert('users', user.toMap());

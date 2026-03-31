@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:gymoraly/views/physical_data_view.dart';
 import '../widgets/step_progress_indicator.dart';
-// Lembre-se de importar a próxima tela do Passo 4 quando for criá-la
-// import 'physical_data_view.dart';
+import '../controllers/register_controller.dart'; // <-- 1. Adicione este import
+import 'physical_data_view.dart';
 
 class GenderView extends StatefulWidget {
-  const GenderView({super.key});
+  final RegisterController
+  controller; // <-- 2. Declare a variável do controller
+
+  // 3. Adicione o 'required this.controller' no construtor
+  const GenderView({super.key, required this.controller});
 
   @override
   State<GenderView> createState() => _GenderViewState();
@@ -171,14 +174,22 @@ class _GenderViewState extends State<GenderView> {
                   // Botão Próximo
                   Expanded(
                     child: ElevatedButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const PhysicalDataView(),
-                          ),
-                        );
-                      },
+                      onPressed: selectedGender == null
+                          ? null
+                          : () {
+                              // Salva o gênero no model
+                              widget.controller.model.gender = selectedGender!;
+
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  // Passa para a última tela!
+                                  builder: (context) => PhysicalDataView(
+                                    controller: widget.controller,
+                                  ),
+                                ),
+                              );
+                            },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: primaryColor,
                         foregroundColor: Colors.white,
