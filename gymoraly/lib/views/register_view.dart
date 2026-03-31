@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../controllers/register_controller.dart';
+// Lembre-se de importar o novo componente que criamos acima!
+import '../widgets/step_progress_indicator.dart'; 
 
 class RegisterView extends StatefulWidget {
   const RegisterView({super.key});
@@ -11,7 +13,6 @@ class RegisterView extends StatefulWidget {
 class _RegisterViewState extends State<RegisterView> {
   final controller = RegisterController();
 
-  // Helper de Input (Mesmo padrão da LoginView)
   Widget _buildInputGroup({
     required String label,
     required String hint,
@@ -65,9 +66,20 @@ class _RegisterViewState extends State<RegisterView> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black, size: 20),
-          onPressed: () => Navigator.pop(context),
+        leadingWidth: 64,
+        leading: Padding(
+          padding: const EdgeInsets.only(left: 16.0, top: 8.0, bottom: 8.0),
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.grey.shade100,
+              shape: BoxShape.circle,
+            ),
+            child: IconButton(
+              icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black, size: 18),
+              padding: const EdgeInsets.only(right: 2),
+              onPressed: () => Navigator.pop(context),
+            ),
+          ),
         ),
       ),
       body: ListenableBuilder(
@@ -75,17 +87,30 @@ class _RegisterViewState extends State<RegisterView> {
         builder: (context, child) {
           return SafeArea(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 30.0),
+              padding: const EdgeInsets.symmetric(horizontal: 30.0, vertical: 10.0),
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'Criar Conta',
-                    style: TextStyle(fontSize: 28, fontWeight: FontWeight.w900, color: primaryColor),
+                  // Usando o novo componente reutilizável!
+                  const Center(
+                    child: StepProgressIndicator(currentStep: 1),
                   ),
-                  const SizedBox(height: 10),
-                  Text(
-                    'Junte-se à comunidade Gymoraly',
-                    style: TextStyle(color: Colors.grey.shade600, fontSize: 16),
+                  const SizedBox(height: 30),
+                  
+                  Center(
+                    child: Column(
+                      children: [
+                        const Text(
+                          'Criar Conta',
+                          style: TextStyle(fontSize: 28, fontWeight: FontWeight.w900, color: primaryColor),
+                        ),
+                        const SizedBox(height: 10),
+                        Text(
+                          'Junte-se à comunidade Gymoraly',
+                          style: TextStyle(color: Colors.grey.shade600, fontSize: 16),
+                        ),
+                      ],
+                    ),
                   ),
                   const SizedBox(height: 40),
 
@@ -140,7 +165,7 @@ class _RegisterViewState extends State<RegisterView> {
                       ),
                       child: controller.isLoading
                           ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                          : const Text('Cadastrar', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                          : const Text('Próximo', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                     ),
                   ),
                   const SizedBox(height: 20),
