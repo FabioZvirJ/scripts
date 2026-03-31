@@ -9,26 +9,8 @@ class PhysicalDataView extends StatefulWidget {
 }
 
 class _PhysicalDataViewState extends State<PhysicalDataView> {
-  // Controladores para os campos de texto
-  final TextEditingController _heightController = TextEditingController(text: '175');
-  final TextEditingController _weightController = TextEditingController(text: '70');
-
-  // Variável de estado para o Slider acompanhar a altura
-  double _currentHeight = 175.0;
-
-  @override
-  void initState() {
-    super.initState();
-    // Adiciona listener para caso o usuário digite a altura manualmente
-    _heightController.addListener(() {
-      final value = double.tryParse(_heightController.text);
-      if (value != null && value >= 100 && value <= 250) {
-        setState(() {
-          _currentHeight = value;
-        });
-      }
-    });
-  }
+  final TextEditingController _heightController = TextEditingController();
+  final TextEditingController _weightController = TextEditingController();
 
   @override
   void dispose() {
@@ -37,9 +19,10 @@ class _PhysicalDataViewState extends State<PhysicalDataView> {
     super.dispose();
   }
 
-  // Helper para os inputs menores dessa tela
-  Widget _buildSmallInput({
+  // Input atualizado para ocupar a tela toda, igualzinho ao Passo 1
+  Widget _buildInputGroup({
     required String label,
+    required String hint,
     required TextEditingController controller,
   }) {
     return Column(
@@ -51,17 +34,18 @@ class _PhysicalDataViewState extends State<PhysicalDataView> {
         ),
         const SizedBox(height: 8),
         SizedBox(
-          height: 52,
-          width: 100, // Largura restrita para caber o boneco do lado
+          height: 56,
+          width: double.infinity, // Ocupa a largura toda
           child: TextField(
             controller: controller,
             keyboardType: TextInputType.number,
-            textAlign: TextAlign.center,
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
             decoration: InputDecoration(
+              hintText: hint,
+              hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 15),
               filled: true,
               fillColor: Colors.grey.shade50,
-              contentPadding: const EdgeInsets.symmetric(horizontal: 12),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
                 borderSide: BorderSide(color: Colors.grey.shade300),
@@ -103,12 +87,12 @@ class _PhysicalDataViewState extends State<PhysicalDataView> {
         ),
       ),
       body: SafeArea(
-        child: Padding(
+        // SingleChildScrollView resolve o problema de overflow de tela!
+        child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 30.0, vertical: 10.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Indicador de progresso (Passo 4 - Final)
               const Center(child: StepProgressIndicator(currentStep: 4)),
               const SizedBox(height: 30),
 
@@ -118,93 +102,22 @@ class _PhysicalDataViewState extends State<PhysicalDataView> {
               ),
               const SizedBox(height: 40),
 
-              Expanded(
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    // Coluna da Esquerda (Inputs Altura e Peso)
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _buildSmallInput(
-                          label: 'Altura (cm)',
-                          controller: _heightController,
-                        ),
-                        const SizedBox(height: 40),
-                        _buildSmallInput(
-                          label: 'Peso (kg)',
-                          controller: _weightController,
-                        ),
-                      ],
-                    ),
-                    
-                    const SizedBox(width: 20),
-
-                    // Boneco Neutro
-                    Expanded(
-                      child: Center(
-                        child: Icon(
-                          Icons.accessibility_new_rounded,
-                          size: 220,
-                          color: Colors.grey.shade300,
-                        ),
-                      ),
-                    ),
-
-                    // Coluna da Direita (Caixinha flutuante e Slider Vertical)
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        // Caixinha com o valor atual do Slider
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                          decoration: BoxDecoration(
-                            color: Colors.grey.shade200,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Text(
-                            _currentHeight.toInt().toString(),
-                            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black87),
-                          ),
-                        ),
-                        const SizedBox(height: 10),
-                        // Slider Vertical (Rotacionado)
-                        SizedBox(
-                          height: 250,
-                          child: RotatedBox(
-                            quarterTurns: 3, // Gira o slider para ficar vertical
-                            child: SliderTheme(
-                              data: SliderTheme.of(context).copyWith(
-                                trackHeight: 6.0,
-                                activeTrackColor: primaryColor,
-                                inactiveTrackColor: Colors.grey.shade200,
-                                thumbColor: primaryColor,
-                                thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 10.0),
-                                overlayColor: primaryColor.withOpacity(0.2),
-                              ),
-                              child: Slider(
-                                value: _currentHeight,
-                                min: 100, // Altura mínima 1m
-                                max: 250, // Altura máxima 2.5m
-                                onChanged: (value) {
-                                  setState(() {
-                                    _currentHeight = value;
-                                    // Atualiza o campo de texto automaticamente
-                                    _heightController.text = value.toInt().toString();
-                                  });
-                                },
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
+              _buildInputGroup(
+                label: 'Altura (cm)',
+                hint: 'Ex: 175',
+                controller: _heightController,
+              ),
+              const SizedBox(height: 20),
+              
+              _buildInputGroup(
+                label: 'Peso (kg)',
+                hint: 'Ex: 70',
+                controller: _weightController,
               ),
 
-              const SizedBox(height: 20),
+              // Espaço grande para jogar os botões para baixo visualmente
+              const SizedBox(height: 80), 
+
               Row(
                 children: [
                   Expanded(
@@ -224,8 +137,8 @@ class _PhysicalDataViewState extends State<PhysicalDataView> {
                   Expanded(
                     child: ElevatedButton(
                       onPressed: () {
-                        // Ação final! Enviar os dados para a API/Controller e finalizar o cadastro
-                        // print('Altura: ${_heightController.text}, Peso: ${_weightController.text}');
+                        // Ação de Cadastrar
+                        // print("Altura: ${_heightController.text}, Peso: ${_weightController.text}");
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: primaryColor,
