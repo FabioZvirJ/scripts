@@ -72,22 +72,22 @@ class CommunityView extends StatelessWidget {
                       const SizedBox(height: 25),
 
                       // Seção Formim (Tópicos)
-                      _buildSectionHeader('Formim', Icons.menu),
+                      _buildSectionHeader('Fóruns Ativos', Icons.menu),
                       const SizedBox(height: 15),
                       _buildTopicItem(
-                        'Ideias de treino',
+                        'Ideias de Treino',
                         '1 novo tópico',
                         Icons.swap_vert_rounded,
                         darkIconColor,
                       ),
                       _buildTopicItem(
-                        'Anamnese informa',
+                        'Dicas de Nutrição',
                         '5 novos tópicos',
                         Icons.g_mobiledata_rounded,
                         darkIconColor,
                       ),
                       _buildTopicItem(
-                        'Equipamento coletivo',
+                        'Treino Coletivo',
                         '2 novos tópicos',
                         Icons.chat_bubble_outline_rounded,
                         darkIconColor,
@@ -96,7 +96,7 @@ class CommunityView extends StatelessWidget {
                       const Divider(height: 40),
 
                       // Seção Timer Rápido
-                      _buildSectionHeader('Timer rápido', Icons.more_horiz),
+                      _buildSectionHeader('Cronômetro Rápido', Icons.more_horiz),
                       const SizedBox(height: 15),
                       _buildUserRow('Glynto Silva'),
                       
@@ -104,7 +104,7 @@ class CommunityView extends StatelessWidget {
 
                       // Seção Recomendar
                       const Text(
-                        'Recomendar',
+                        'Minhas Recomendações',
                         style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 10),
