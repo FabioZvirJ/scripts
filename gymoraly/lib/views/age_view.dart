@@ -9,51 +9,70 @@ class AgeView extends StatefulWidget {
 }
 
 class _AgeViewState extends State<AgeView> {
-  // Dados fictícios para o visual (você pode conectar isso ao seu RegisterController depois)
   final List<String> months = [
     'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
     'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
   ];
   final List<int> days = List.generate(31, (index) => index + 1);
 
-  int selectedMonthIndex = 2; // Começa em Março, por exemplo
-  int selectedDayIndex = 28;  // Começa no dia 29
-  int calculatedAge = 10;     // Idade (pode ser calculada dinamicamente depois)
+  int selectedMonthIndex = 2; // Inicia em Março (Index 2)
+  int selectedDayIndex = 28;  // Inicia no dia 29 (Index 28)
 
-  // Helper para construir as "Roletas" (Wheels)
+  late FixedExtentScrollController _monthController;
+  late FixedExtentScrollController _dayController;
+
+  @override
+  void initState() {
+    super.initState();
+    // Inicializa os controladores na posição correta
+    _monthController = FixedExtentScrollController(initialItem: selectedMonthIndex);
+    _dayController = FixedExtentScrollController(initialItem: selectedDayIndex);
+  }
+
+  @override
+  void dispose() {
+    _monthController.dispose();
+    _dayController.dispose();
+    super.dispose();
+  }
+
+  // Novo Helper atualizado para as roletas separadas
   Widget _buildWheelPicker({
     required int itemCount,
     required Widget Function(int index, bool isSelected) itemBuilder,
     required ValueChanged<int> onSelectedItemChanged,
-    required int initialItem,
-    double width = 100,
+    required FixedExtentScrollController controller,
+    required int selectedIndex,
+    required double width,
   }) {
     return SizedBox(
       width: width,
-      height: 200,
+      height: 250, // Maior para aparecer os itens acima e abaixo (efeito de roleta)
       child: Stack(
         alignment: Alignment.center,
         children: [
-          // Caixinha azul de fundo (seleção)
+          // Caixinha de seleção azul
           Container(
-            height: 48,
+            height: 52,
+            width: width,
             decoration: BoxDecoration(
               color: const Color(0xFFE3F2FD),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(color: const Color(0xFF2196F3), width: 1.5),
             ),
           ),
-          // A roleta rolável
+          // Scroll da roleta
           ListWheelScrollView.useDelegate(
-            itemExtent: 48,
+            controller: controller,
+            itemExtent: 52,
             physics: const FixedExtentScrollPhysics(),
-            controller: FixedExtentScrollController(initialItem: initialItem),
+            perspective: 0.005, // Leve efeito 3D
+            overAndUnderCenterOpacity: 0.3, // Deixa os itens em cima e embaixo apagadinhos!
             onSelectedItemChanged: onSelectedItemChanged,
             childDelegate: ListWheelChildBuilderDelegate(
               childCount: itemCount,
               builder: (context, index) {
-                // Checa se é o item selecionado atualmente para mudar a cor
-                bool isSelected = initialItem == index;
+                bool isSelected = selectedIndex == index;
                 return Center(
                   child: itemBuilder(index, isSelected),
                 );
@@ -96,26 +115,26 @@ class _AgeViewState extends State<AgeView> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              // Indicador no Passo 2
+              // Indicador de progresso (Passo 2)
               const StepProgressIndicator(currentStep: 2),
               const SizedBox(height: 30),
 
-              // Título
               const Text(
                 'Qual sua idade?',
                 style: TextStyle(fontSize: 26, fontWeight: FontWeight.w900, color: Colors.black87),
               ),
               const SizedBox(height: 60),
 
-              // Área dos Pickers e Idade
+              // Área dos Pickers (Sem a Idade do lado)
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // Picker de Mês
+                  // Roleta do Mês
                   _buildWheelPicker(
-                    width: 120,
+                    width: 140, // Largura ajustada para caber os meses
                     itemCount: months.length,
-                    initialItem: selectedMonthIndex,
+                    controller: _monthController,
+                    selectedIndex: selectedMonthIndex,
                     onSelectedItemChanged: (index) {
                       setState(() => selectedMonthIndex = index);
                     },
@@ -125,18 +144,19 @@ class _AgeViewState extends State<AgeView> {
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                          color: isSelected ? Colors.black87 : Colors.grey.shade400,
+                          color: isSelected ? Colors.black87 : Colors.grey.shade600,
                         ),
                       );
                     },
                   ),
-                  const SizedBox(width: 10),
+                  const SizedBox(width: 12),
 
-                  // Picker de Dia
+                  // Roleta do Dia
                   _buildWheelPicker(
-                    width: 70,
+                    width: 80, // Largura mais estreita para os números
                     itemCount: days.length,
-                    initialItem: selectedDayIndex,
+                    controller: _dayController,
+                    selectedIndex: selectedDayIndex,
                     onSelectedItemChanged: (index) {
                       setState(() => selectedDayIndex = index);
                     },
@@ -146,47 +166,19 @@ class _AgeViewState extends State<AgeView> {
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                          color: isSelected ? Colors.black87 : Colors.grey.shade400,
+                          color: isSelected ? Colors.black87 : Colors.grey.shade600,
                         ),
                       );
                     },
                   ),
-                  const SizedBox(width: 20),
-
-                  // Caixinha da Idade (Visual)
-                  Column(
-                    children: [
-                      const Text(
-                        'Idade',
-                        style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
-                      ),
-                      const SizedBox(height: 8),
-                      Container(
-                        width: 70,
-                        height: 48,
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                          color: Colors.grey.shade50,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: Colors.grey.shade300),
-                        ),
-                        child: Text(
-                          calculatedAge.toString(),
-                          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
-                        ),
-                      ),
-                    ],
-                  ),
                 ],
               ),
               
-              // Espaçador para jogar os botões para o final da tela
               const Spacer(),
 
-              // Botões "Anterior" e "Próximo"
+              // Botões de Rodapé
               Row(
                 children: [
-                  // Botão Anterior
                   Expanded(
                     child: ElevatedButton(
                       onPressed: () => Navigator.pop(context),
@@ -201,11 +193,14 @@ class _AgeViewState extends State<AgeView> {
                     ),
                   ),
                   const SizedBox(width: 16),
-                  // Botão Próximo
                   Expanded(
                     child: ElevatedButton(
                       onPressed: () {
-                        // Navegue para a View do Passo 3 (Identificação) aqui
+                        // Você pode acessar o valor escolhido assim:
+                        // print('Selecionado: ${days[selectedDayIndex]} de ${months[selectedMonthIndex]}');
+                        
+                        // Navegue para o Passo 3 aqui
+                        // Navigator.push(context, MaterialPageRoute(builder: (context) => const IdentificacaoView()));
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: primaryColor,
@@ -219,7 +214,7 @@ class _AgeViewState extends State<AgeView> {
                   ),
                 ],
               ),
-              const SizedBox(height: 20), // Margem segura na parte inferior
+              const SizedBox(height: 20),
             ],
           ),
         ),
