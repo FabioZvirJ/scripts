@@ -1,15 +1,8 @@
 import 'package:flutter/material.dart';
 
-class HomeView extends StatefulWidget {
-  final String userName; // Passamos o nome vindo do banco
+class HomeView extends StatelessWidget {
+  final String userName;
   const HomeView({super.key, required this.userName});
-
-  @override
-  State<HomeView> createState() => _HomeViewState();
-}
-
-class _HomeViewState extends State<HomeView> {
-  int _currentIndex = 0; // Para o BottomNavigationBar
 
   @override
   Widget build(BuildContext context) {
@@ -19,86 +12,111 @@ class _HomeViewState extends State<HomeView> {
       backgroundColor: const Color(0xFFF8F9FA),
       body: SingleChildScrollView(
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // --- HEADER AZUL + CARD ---
+            // --- HEADER AZUL + CARD FLUTUANTE ---
             Stack(
               clipBehavior: Clip.none,
               children: [
+                // Fundo Azul Arredondado
                 Container(
-                  height: 220,
+                  height: 240,
                   width: double.infinity,
                   decoration: const BoxDecoration(
                     color: primaryColor,
-                    borderRadius: BorderRadius.vertical(bottom: Radius.circular(30)),
+                    borderRadius: BorderRadius.vertical(bottom: Radius.circular(40)),
                   ),
-                  padding: const EdgeInsets.only(top: 60, left: 25),
+                  padding: const EdgeInsets.only(top: 70, left: 25),
                   child: Text(
-                    'Olá, ${widget.userName} 👋',
+                    'Olá, $userName 👋',
                     style: const TextStyle(
                       color: Colors.white,
-                      fontSize: 26,
+                      fontSize: 28,
                       fontWeight: FontWeight.bold,
+                      letterSpacing: -0.5,
                     ),
                   ),
                 ),
-                // Card Branco de Objetivo
+                
+                // Card Branco de Objetivo (Posicionado entre o azul e o cinza)
                 Positioned(
-                  top: 130,
+                  top: 140,
                   left: 20,
                   right: 20,
                   child: Container(
                     padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
                       color: Colors.white,
-                      borderRadius: BorderRadius.circular(25),
+                      borderRadius: BorderRadius.circular(30),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
-                          blurRadius: 15,
-                          offset: const Offset(0, 5),
+                          color: Colors.black.withOpacity(0.08),
+                          blurRadius: 20,
+                          offset: const Offset(0, 10),
                         )
                       ],
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text('Objetivo', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                        const Text('45 min de treino', style: TextStyle(fontSize: 16, color: Colors.grey)),
-                        const SizedBox(height: 15),
-                        // Bloco do Exercício
+                        const Text(
+                          'Objetivo',
+                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        ),
+                        const Text(
+                          '45 min de treino',
+                          style: TextStyle(fontSize: 15, color: Colors.grey),
+                        ),
+                        const SizedBox(height: 20),
+                        
+                        // Bloco de Miniatura do Exercício
                         Row(
                           children: [
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(15),
-                              child: Container(
-                                width: 80,
-                                height: 80,
-                                color: Colors.grey.shade200,
-                                child: const Icon(Icons.fitness_center, color: primaryColor), // Placeholder da imagem
+                            Container(
+                              width: 70,
+                              height: 70,
+                              decoration: BoxDecoration(
+                                color: Colors.grey.shade100,
+                                borderRadius: BorderRadius.circular(20),
                               ),
+                              child: const Icon(Icons.fitness_center, color: primaryColor, size: 30),
                             ),
                             const SizedBox(width: 15),
                             const Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text('Último treinado', style: TextStyle(color: Colors.grey, fontSize: 12)),
-                                Text('Peito e Bíceps', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                                Text(
+                                  'Último treinado',
+                                  style: TextStyle(color: Colors.grey, fontSize: 12),
+                                ),
+                                Text(
+                                  'Peito e Bíceps',
+                                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                                ),
                               ],
                             )
                           ],
                         ),
                         const SizedBox(height: 20),
+                        
                         // Botão Continuar
                         SizedBox(
                           width: double.infinity,
-                          height: 50,
+                          height: 55,
                           child: ElevatedButton(
-                            onPressed: () {},
+                            onPressed: () => print("Continuar Treino"),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: primaryColor,
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                              foregroundColor: Colors.white,
+                              elevation: 0,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(15),
+                              ),
                             ),
-                            child: const Text('Continuar treino', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                            child: const Text(
+                              'Continuar treino',
+                              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                            ),
                           ),
                         )
                       ],
@@ -107,70 +125,102 @@ class _HomeViewState extends State<HomeView> {
                 ),
               ],
             ),
-            const SizedBox(height: 180), // Espaço para o card que está por cima
+
+            // Espaço necessário para compensar o Positioned (Card)
+            const SizedBox(height: 190),
 
             // --- SEÇÃO MEUS TREINOS ---
             _buildSectionHeader('Meus treinos'),
+            const SizedBox(height: 10),
             SizedBox(
-              height: 100,
+              height: 110,
               child: ListView(
                 scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.only(left: 20),
+                padding: const EdgeInsets.only(left: 25, right: 10),
                 children: [
-                  _buildWorkoutCard('Treino A', primaryColor),
-                  _buildWorkoutCard('Treino B', primaryColor),
-                  _buildWorkoutCard('Treino C', primaryColor),
+                  _buildWorkoutCard('Treino A', 'Superior', primaryColor),
+                  _buildWorkoutCard('Treino B', 'Inferior', primaryColor),
+                  _buildWorkoutCard('Treino C', 'Cardio', primaryColor),
                 ],
               ),
             ),
 
-            const SizedBox(height: 20),
+            const SizedBox(height: 30),
+
+            // --- SEÇÃO COMUNIDADE ---
             _buildSectionHeader('Destaques da Comunidade'),
-            // Adicione mais itens aqui conforme necessário
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 10),
+              child: Container(
+                width: double.infinity,
+                height: 150,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(25),
+                  border: Border.all(color: Colors.grey.shade200),
+                ),
+                child: const Center(
+                  child: Text(
+                    "Conteúdo da comunidade em breve...",
+                    style: TextStyle(color: Colors.grey),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 30),
           ],
         ),
       ),
-      // --- BOTTOM NAVIGATION BAR ---
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
-        onTap: (index) => setState(() => _currentIndex = index),
-        type: BottomNavigationBarType.fixed,
-        selectedItemColor: primaryColor,
-        unselectedItemColor: Colors.grey,
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.apps), label: 'Treinos'),
-          BottomNavigationBarItem(icon: Icon(Icons.bar_chart), label: 'Progresso'),
-          BottomNavigationBarItem(icon: Icon(Icons.people), label: 'Comunidade'),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Perfil'),
-        ],
-      ),
     );
   }
+
+  // --- WIDGETS AUXILIARES ---
 
   Widget _buildSectionHeader(String title) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 15),
+      padding: const EdgeInsets.symmetric(horizontal: 25),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-          const Text('Ver tudo', style: TextStyle(color: Color(0xFF2196F3), fontSize: 12)),
+          Text(
+            title,
+            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          ),
+          TextButton(
+            onPressed: () {},
+            child: const Text(
+              'Ver tudo',
+              style: TextStyle(color: Color(0xFF2196F3), fontWeight: FontWeight.bold),
+            ),
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildWorkoutCard(String title, Color color) {
+  Widget _buildWorkoutCard(String title, String subtitle, Color color) {
     return Container(
-      width: 140,
+      width: 130,
       margin: const EdgeInsets.only(right: 15),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(25),
         border: Border.all(color: Colors.grey.shade200),
       ),
-      child: Center(
-        child: Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.bolt_rounded, color: color, size: 28),
+          const SizedBox(height: 5),
+          Text(
+            title,
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+          ),
+          Text(
+            subtitle,
+            style: TextStyle(color: Colors.grey.shade500, fontSize: 12),
+          ),
+        ],
       ),
     );
   }

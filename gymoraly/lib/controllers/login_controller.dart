@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gymoraly/views/main_wrapper.dart';
 // Verifique se os caminhos abaixo batem com as suas pastas
 import '../models/login_model.dart';
 import '../models/user_model.dart';
@@ -36,11 +37,13 @@ class LoginController extends ChangeNotifier {
       // 4. Verifica se o contexto ainda é válido (boa prática em Flutter)
       if (!context.mounted) return;
 
+      // No seu LoginController.dart
       if (user != null) {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (context) => HomeView(userName: user.name),
+            builder: (context) =>
+                MainWrapper(userName: user.name), // CHAME O WRAPPER AQUI
           ),
         );
 

@@ -191,11 +191,23 @@ class ProgressView extends StatelessWidget {
 class LineChartPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
-    final paint = Paint()
+    // 1. Definição da Linha
+    final linePaint = Paint()
       ..color = const Color(0xFF2196F3)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 3.0
       ..strokeCap = StrokeCap.round;
+
+    // 2. Definição do Preenchimento (Degradê)
+    final fillPaint = Paint()
+      ..shader = LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [
+          const Color(0xFF2196F3).withOpacity(0.3),
+          const Color(0xFF2196F3).withOpacity(0.0),
+        ],
+      ).createShader(Rect.fromLTWH(0, 0, size.width, size.height));
 
     final path = Path();
     path.moveTo(0, size.height * 0.7);
@@ -203,7 +215,15 @@ class LineChartPainter extends CustomPainter {
     path.quadraticBezierTo(size.width * 0.6, size.height * 0.9, size.width * 0.8, size.height * 0.6);
     path.lineTo(size.width, size.height * 0.65);
 
-    canvas.drawPath(path, paint);
+    // Desenha o preenchimento primeiro
+    final fillPath = Path.from(path);
+    fillPath.lineTo(size.width, size.height);
+    fillPath.lineTo(0, size.height);
+    fillPath.close();
+    canvas.drawPath(fillPath, fillPaint);
+
+    // Desenha a linha por cima
+    canvas.drawPath(path, linePaint);
   }
 
   @override
