@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 // Verifique se os caminhos abaixo batem com as suas pastas
-import '../models/login_model.dart'; 
+import '../models/login_model.dart';
 import '../models/user_model.dart';
 import '../services/database_helper.dart';
+import '../views/home_view.dart';
 
 class LoginController extends ChangeNotifier {
   // Você PRECISA dessa linha para que o método login reconheça o "model"
   final LoginModel model = LoginModel();
-  
+
   bool isPasswordVisible = false;
   bool isLoading = false;
 
@@ -24,8 +25,8 @@ class LoginController extends ChangeNotifier {
     try {
       // 2. Busca no SQLite usando os dados do model
       final User? user = await DatabaseHelper().loginUser(
-        model.email, 
-        model.password
+        model.email,
+        model.password,
       );
 
       // 3. Para o loading
@@ -36,14 +37,13 @@ class LoginController extends ChangeNotifier {
       if (!context.mounted) return;
 
       if (user != null) {
-        // LOGIN SUCESSO
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Bem-vindo, ${user.name}!'),
-            backgroundColor: Colors.blue,
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => HomeView(userName: user.name),
           ),
         );
-        
+
         // TODO: Navigator.pushReplacement para a sua tela Home aqui
       } else {
         // LOGIN FALHOU
@@ -59,9 +59,9 @@ class LoginController extends ChangeNotifier {
       isLoading = false;
       notifyListeners();
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erro no banco de dados: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Erro no banco de dados: $e')));
       }
     }
   }
