@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:ui'; // IMPORTANTE: Necessário para o PointerDeviceKind
 import '../widgets/step_progress_indicator.dart';
 
 class AgeView extends StatefulWidget {
@@ -15,8 +16,8 @@ class _AgeViewState extends State<AgeView> {
   ];
   final List<int> days = List.generate(31, (index) => index + 1);
 
-  int selectedMonthIndex = 2; // Inicia em Março (Index 2)
-  int selectedDayIndex = 28;  // Inicia no dia 29 (Index 28)
+  int selectedMonthIndex = 2; // Inicia em Março
+  int selectedDayIndex = 28;  // Inicia no dia 29
 
   late FixedExtentScrollController _monthController;
   late FixedExtentScrollController _dayController;
@@ -24,7 +25,6 @@ class _AgeViewState extends State<AgeView> {
   @override
   void initState() {
     super.initState();
-    // Inicializa os controladores na posição correta
     _monthController = FixedExtentScrollController(initialItem: selectedMonthIndex);
     _dayController = FixedExtentScrollController(initialItem: selectedDayIndex);
   }
@@ -36,7 +36,7 @@ class _AgeViewState extends State<AgeView> {
     super.dispose();
   }
 
-  // Novo Helper atualizado para as roletas separadas
+  // Componente da Roleta Atualizado
   Widget _buildWheelPicker({
     required int itemCount,
     required Widget Function(int index, bool isSelected) itemBuilder,
@@ -47,36 +47,47 @@ class _AgeViewState extends State<AgeView> {
   }) {
     return SizedBox(
       width: width,
-      height: 250, // Maior para aparecer os itens acima e abaixo (efeito de roleta)
+      height: 250,
       child: Stack(
         alignment: Alignment.center,
         children: [
-          // Caixinha de seleção azul
-          Container(
-            height: 52,
-            width: width,
-            decoration: BoxDecoration(
-              color: const Color(0xFFE3F2FD),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: const Color(0xFF2196F3), width: 1.5),
+          // 1. A Roleta de Fundo (Agora com ScrollConfiguration para o Mouse)
+          ScrollConfiguration(
+            behavior: ScrollConfiguration.of(context).copyWith(
+              dragDevices: {
+                PointerDeviceKind.touch,
+                PointerDeviceKind.mouse, // <-- ISSO AQUI FAZ O MOUSE ARRASTAR NO WINDOWS
+              },
+            ),
+            child: ListWheelScrollView.useDelegate(
+              controller: controller,
+              itemExtent: 52,
+              physics: const FixedExtentScrollPhysics(),
+              perspective: 0.005,
+              overAndUnderCenterOpacity: 0.3,
+              onSelectedItemChanged: onSelectedItemChanged,
+              childDelegate: ListWheelChildBuilderDelegate(
+                childCount: itemCount,
+                builder: (context, index) {
+                  bool isSelected = selectedIndex == index;
+                  return Center(
+                    child: itemBuilder(index, isSelected),
+                  );
+                },
+              ),
             ),
           ),
-          // Scroll da roleta
-          ListWheelScrollView.useDelegate(
-            controller: controller,
-            itemExtent: 52,
-            physics: const FixedExtentScrollPhysics(),
-            perspective: 0.005, // Leve efeito 3D
-            overAndUnderCenterOpacity: 0.3, // Deixa os itens em cima e embaixo apagadinhos!
-            onSelectedItemChanged: onSelectedItemChanged,
-            childDelegate: ListWheelChildBuilderDelegate(
-              childCount: itemCount,
-              builder: (context, index) {
-                bool isSelected = selectedIndex == index;
-                return Center(
-                  child: itemBuilder(index, isSelected),
-                );
-              },
+          
+          // 2. A Caixinha Azul desenhada por cima (IgnorePointer para não bloquear o clique)
+          IgnorePointer(
+            child: Container(
+              height: 52,
+              width: width,
+              decoration: BoxDecoration(
+                color: const Color(0xFFE3F2FD).withOpacity(0.4), // Leve transparência
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: const Color(0xFF2196F3), width: 1.5),
+              ),
             ),
           ),
         ],
@@ -115,7 +126,6 @@ class _AgeViewState extends State<AgeView> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              // Indicador de progresso (Passo 2)
               const StepProgressIndicator(currentStep: 2),
               const SizedBox(height: 30),
 
@@ -125,13 +135,11 @@ class _AgeViewState extends State<AgeView> {
               ),
               const SizedBox(height: 60),
 
-              // Área dos Pickers (Sem a Idade do lado)
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // Roleta do Mês
                   _buildWheelPicker(
-                    width: 140, // Largura ajustada para caber os meses
+                    width: 140,
                     itemCount: months.length,
                     controller: _monthController,
                     selectedIndex: selectedMonthIndex,
@@ -150,10 +158,8 @@ class _AgeViewState extends State<AgeView> {
                     },
                   ),
                   const SizedBox(width: 12),
-
-                  // Roleta do Dia
                   _buildWheelPicker(
-                    width: 80, // Largura mais estreita para os números
+                    width: 80,
                     itemCount: days.length,
                     controller: _dayController,
                     selectedIndex: selectedDayIndex,
@@ -176,7 +182,6 @@ class _AgeViewState extends State<AgeView> {
               
               const Spacer(),
 
-              // Botões de Rodapé
               Row(
                 children: [
                   Expanded(
@@ -196,11 +201,7 @@ class _AgeViewState extends State<AgeView> {
                   Expanded(
                     child: ElevatedButton(
                       onPressed: () {
-                        // Você pode acessar o valor escolhido assim:
-                        // print('Selecionado: ${days[selectedDayIndex]} de ${months[selectedMonthIndex]}');
-                        
                         // Navegue para o Passo 3 aqui
-                        // Navigator.push(context, MaterialPageRoute(builder: (context) => const IdentificacaoView()));
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: primaryColor,
