@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gymoraly/views/notifications_settings_view.dart';
 
 class SettingsView extends StatelessWidget {
   const SettingsView({super.key});
@@ -15,7 +16,16 @@ class SettingsView extends StatelessWidget {
             child: ListView(
               padding: const EdgeInsets.symmetric(horizontal: 25),
               children: [
-                _buildOption(Icons.notifications_none, "Notificações"),
+                _buildOption(
+                  Icons.notifications_none,
+                  "Notificações",
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const NotificationsSettingsView(),
+                    ),
+                  ),
+                ),
                 _buildOption(Icons.language_rounded, "Idioma"),
                 _buildOption(Icons.dark_mode_outlined, "Tema"),
                 _buildOption(Icons.info_outline, "Sobre o App"),
@@ -42,27 +52,51 @@ class SettingsView extends StatelessWidget {
           child: SafeArea(
             child: Row(
               children: [
-                IconButton(icon: const Icon(Icons.arrow_back, color: Colors.white), onPressed: () => Navigator.pop(context)),
-                Text(title, style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)),
+                IconButton(
+                  icon: const Icon(Icons.arrow_back, color: Colors.white),
+                  onPressed: () => Navigator.pop(context),
+                ),
+                Text(
+                  title,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ],
             ),
           ),
         ),
-        Positioned(top: 110, child: Container(padding: const EdgeInsets.all(15), decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle), child: Icon(icon, size: 50, color: const Color(0xFF2196F3)))),
+        Positioned(
+          top: 110,
+          child: Container(
+            padding: const EdgeInsets.all(15),
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, size: 50, color: const Color(0xFF2196F3)),
+          ),
+        ),
       ],
     );
   }
 
-  Widget _buildOption(IconData icon, String title) {
+  Widget _buildOption(IconData icon, String title, {VoidCallback? onTap}) {
     return Card(
       margin: const EdgeInsets.only(bottom: 15),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
       elevation: 0,
       child: ListTile(
+        onTap: onTap, // Agora o ListTile usa a função que você passar
         leading: Icon(icon, color: Colors.blue),
         title: Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
-        trailing: const Icon(Icons.arrow_forward_ios, size: 14),
-        onTap: () {},
+        trailing: const Icon(
+          Icons.arrow_forward_ios,
+          size: 14,
+          color: Colors.grey,
+        ),
       ),
     );
   }
