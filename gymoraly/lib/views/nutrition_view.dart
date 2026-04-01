@@ -67,13 +67,6 @@ class NutritionView extends StatelessWidget {
                       ),
                       const SizedBox(height: 15),
                       
-                      // Receita 1
-                      _buildRecipeItem(
-                        title: 'Smoothie de proteínas',
-                        subtitle: 'Perfeito para após o treino',
-                        imageUrl: 'https://images.unsplash.com/photo-1553530979-c5c2a1e48bc0?auto=format&fit=crop&q=80&w=200', // Imagem de exemplo
-                      ),
-                      
                       // Receita 2
                       _buildRecipeItem(
                         title: 'Omelete de claras',
