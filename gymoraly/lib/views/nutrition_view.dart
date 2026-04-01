@@ -67,7 +67,6 @@ class NutritionView extends StatelessWidget {
                       ),
                       const SizedBox(height: 15),
                       
-                      // Receita 2
                       _buildRecipeItem(
                         title: 'Omelete de claras',
                         subtitle: 'Ideia de café da manhã proteico',

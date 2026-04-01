@@ -28,45 +28,54 @@ class HomeView extends StatelessWidget {
                     color: primaryColor,
                     borderRadius: BorderRadius.vertical(bottom: Radius.circular(40)),
                   ),
-                  // Adicionei 'right: 25' para o ícone não grudar na borda
                   padding: const EdgeInsets.only(top: 70, left: 25, right: 25), 
                   child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween, // Joga um pra cada ponta!
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween, // Joga um pra cada lado
                     children: [
-                      // Texto de Saudação
-                      Text(
-                        'Olá, $userName 👋',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 28,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: -0.5,
+                      // 1. ÍCONE DE PERFIL NA ESQUERDA
+                      // MouseRegion faz o cursor virar a "mãozinha" de clique
+                      MouseRegion(
+                        cursor: SystemMouseCursors.click,
+                        child: GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => ProfileView(userName: userName),
+                              ),
+                            );
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.all(2), // Bordinha branca
+                            decoration: const BoxDecoration(
+                              color: Colors.white,
+                              shape: BoxShape.circle,
+                            ),
+                            child: const CircleAvatar(
+                              radius: 20, 
+                              backgroundColor: Color(0xFFE3F2FD), 
+                              child: Icon(Icons.person, color: primaryColor, size: 24),
+                            ),
+                          ),
                         ),
                       ),
-                      
-                      // Ícone de Perfil Clicável
-                      GestureDetector(
-                        onTap: () {
-                          // Navega para a tela de Perfil quando clicado
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => ProfileView(userName: userName),
-                            ),
-                          );
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.all(2), // Bordinha branca opcional
-                          decoration: const BoxDecoration(
+
+                      const SizedBox(width: 15), // Espaço de segurança
+
+                      // 2. TEXTO DE SAUDAÇÃO NA DIREITA
+                      Flexible(
+                        child: Text(
+                          'Olá, $userName 👋',
+                          textAlign: TextAlign.right, // Alinha o texto na direita
+                          style: const TextStyle(
                             color: Colors.white,
-                            shape: BoxShape.circle,
+                            fontSize: 28,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: -0.5,
                           ),
-                          child: const CircleAvatar(
-                            radius: 20,
-                            backgroundColor: Color(0xFFE3F2FD), // Fundo azul bem clarinho
-                            child: Icon(Icons.person, color: primaryColor, size: 24),
-                          ),
+                          maxLines: 1, 
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
                     ],
