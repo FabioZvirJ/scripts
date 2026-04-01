@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gymoraly/views/community_view.dart';
+import 'package:gymoraly/views/nutrition_view.dart';
 import 'package:gymoraly/views/profile_view.dart';
 import 'home_view.dart';
 import 'progress_view.dart';
@@ -23,6 +24,7 @@ class _MainWrapperState extends State<MainWrapper> {
       const ProgressView(),               // Índice 1
       const CommunityView(),
       ProfileView(userName: widget.userName),
+      const NutritionView(),
     ];
 
     return Scaffold(
@@ -45,6 +47,7 @@ class _MainWrapperState extends State<MainWrapper> {
           BottomNavigationBarItem(icon: Icon(Icons.bar_chart), label: 'Progresso'),
           BottomNavigationBarItem(icon: Icon(Icons.people), label: 'Comunidade'),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Perfil'),
+          BottomNavigationBarItem(icon: Icon(Icons.restaurant_menu), label: 'Nutrição'),
         ],
       ),
     );
