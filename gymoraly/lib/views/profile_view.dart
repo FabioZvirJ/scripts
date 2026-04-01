@@ -27,7 +27,7 @@ class ProfileView extends StatelessWidget {
               alignment: Alignment.center,
               clipBehavior: Clip.none,
               children: [
-                Container(
+               Container(
                   height: 160,
                   width: double.infinity,
                   decoration: const BoxDecoration(
@@ -36,14 +36,30 @@ class ProfileView extends StatelessWidget {
                       bottom: Radius.circular(30),
                     ),
                   ),
-                  padding: const EdgeInsets.only(top: 60, left: 25),
-                  child: const Text(
-                    'Perfil',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                    ),
+                  // Voltamos com o padding para empurrar a seta e o texto para baixo!
+                  padding: const EdgeInsets.only(top: 55, left: 10), 
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.arrow_back, color: Colors.white, size: 28),
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                      ),
+                      const Padding(
+                        // Esse padding top de 6 alinha o texto perfeitamente com o meio da seta
+                        padding: EdgeInsets.only(top: 6, left: 5), 
+                        child: Text(
+                          'Perfil',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 28,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
                 // --- FOTO DE PERFIL ---

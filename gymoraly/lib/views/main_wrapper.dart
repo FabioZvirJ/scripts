@@ -25,7 +25,6 @@ class _MainWrapperState extends State<MainWrapper> {
       HomeView(userName: widget.userName), // Índice 0
       const ProgressView(),               // Índice 1
       const CommunityView(),              // Índice 2
-      ProfileView(userName: widget.userName), // Índice 3
       const NutritionView(),              // Índice 4
       const ProfissionaisView(),          // Índice 5 <-- NOVA TELA
     ];
