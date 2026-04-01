@@ -13,6 +13,7 @@ dependencies:
 
   # Ícones padrão para iOS e Android
   cupertino_icons: ^1.0.8
+  flag: ^7.0.2
 
   # --- BANCO DE DADOS INTERNO ---
   sqflite: ^2.3.0    # Motor do SQLite para Flutter
