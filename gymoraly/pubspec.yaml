@@ -11,13 +11,11 @@ dependencies:
   flutter:
     sdk: flutter
 
-  # Ícones padrão para iOS e Android
   cupertino_icons: ^1.0.8
   flag: ^7.0.2
 
-  # --- BANCO DE DADOS INTERNO ---
-  sqflite: ^2.3.0    # Motor do SQLite para Flutter
-  path: ^1.9.0       # Utilitário para encontrar o caminho das pastas no celular
+  sqflite: ^2.3.0    
+  path: ^1.9.0       
   sqflite_common_ffi: ^2.3.0
 
 dev_dependencies:

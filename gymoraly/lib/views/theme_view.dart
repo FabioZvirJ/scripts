@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../controllers/theme_controller.dart'; 
 
 class ThemeView extends StatefulWidget {
   const ThemeView({super.key});
@@ -8,64 +9,87 @@ class ThemeView extends StatefulWidget {
 }
 
 class _ThemeViewState extends State<ThemeView> {
-  // Estado que guarda qual tema está selecionado no momento
-  String selectedTheme = 'Claro';
-
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FA),
-      body: Column(
-        children: [
-          _buildHeader(context, "Tema", Icons.dark_mode_rounded),
-          const SizedBox(height: 80),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 25),
-            child: Column(
-              children: [
-                // Não precisamos mais passar "true" ou "false", o método descobre sozinho
-                _buildThemeCard("Claro", Icons.light_mode),
-                const SizedBox(height: 15),
-                _buildThemeCard("Escuro", Icons.dark_mode),
-              ],
-            ),
+    // O AnimatedBuilder faz essa tela se redesenhar sempre que o tema mudar
+    return AnimatedBuilder(
+      animation: themeController,
+      builder: (context, child) {
+        // Verifica se o modo atual é escuro
+        final isDark = themeController.isDarkMode;
+
+        return Scaffold(
+          // Se for escuro, usa fundo escuro. Se for claro, usa o fundo claro.
+          backgroundColor: isDark ? const Color(0xFF121212) : const Color(0xFFF8F9FA),
+          body: Column(
+            children: [
+              _buildHeader(context, "Tema", Icons.dark_mode_rounded),
+              const SizedBox(height: 80),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 25),
+                child: Column(
+                  children: [
+                    // Card do Tema Claro
+                    _buildThemeCard(
+                      title: "Claro", 
+                      icon: Icons.light_mode, 
+                      isSelected: !isDark, // Está selecionado se isDark for falso
+                      isDarkTheme: isDark,
+                      onTap: () => themeController.toggleTheme(false), // Ativa modo claro
+                    ),
+                    const SizedBox(height: 15),
+                    // Card do Tema Escuro
+                    _buildThemeCard(
+                      title: "Escuro", 
+                      icon: Icons.dark_mode, 
+                      isSelected: isDark, // Está selecionado se isDark for verdadeiro
+                      isDarkTheme: isDark,
+                      onTap: () => themeController.toggleTheme(true), // Ativa modo escuro
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
+        );
+      }
     );
   }
 
-  // Atualizei o método para receber apenas o título e o ícone
-  Widget _buildThemeCard(String title, IconData icon) {
-    // Verifica se este card é o que está selecionado na variável de estado
-    bool isSelected = selectedTheme == title;
+  // Atualizei o método para receber os parâmetros novos e adaptar as cores
+  Widget _buildThemeCard({
+    required String title, 
+    required IconData icon, 
+    required bool isSelected, 
+    required bool isDarkTheme,
+    required VoidCallback onTap,
+  }) {
+    // Cores dinâmicas para os cards dependendo do tema do app
+    final cardColor = isDarkTheme ? const Color(0xFF1E1E1E) : Colors.white;
+    final textColor = isDarkTheme ? Colors.white : Colors.black;
 
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white, 
+        color: cardColor, 
         borderRadius: BorderRadius.circular(20), 
-        // Se estiver selecionado, coloca a borda azul. Se não, deixa transparente para manter o tamanho
+        // Se estiver selecionado, coloca a borda azul. Se não, deixa transparente
         border: Border.all(
           color: isSelected ? Colors.blue : Colors.transparent, 
           width: 2,
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
+            // Sombra mais suave no modo escuro
+            color: isDarkTheme ? Colors.black.withOpacity(0.2) : Colors.black.withOpacity(0.03),
             blurRadius: 10,
             offset: const Offset(0, 5),
           ),
         ],
       ),
       child: ListTile(
-        onTap: () {
-          // Quando clicar, atualiza o estado para o título deste card
-          setState(() {
-            selectedTheme = title;
-          });
-        },
+        onTap: onTap, // Executa a mudança de tema
         leading: Icon(icon, color: isSelected ? Colors.blue : Colors.grey),
-        title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
+        title: Text(title, style: TextStyle(fontWeight: FontWeight.bold, color: textColor)),
         trailing: isSelected 
           ? const Icon(Icons.radio_button_checked, color: Colors.blue) 
           : const Icon(Icons.radio_button_off, color: Colors.grey),
@@ -73,7 +97,7 @@ class _ThemeViewState extends State<ThemeView> {
     );
   }
 
-  // Header mantido idêntico ao seu
+  // O Header continua o mesmo, mantendo o azul principal
   Widget _buildHeader(BuildContext context, String title, IconData icon) {
     return Stack(alignment: Alignment.center, clipBehavior: Clip.none, children: [
       Container(
