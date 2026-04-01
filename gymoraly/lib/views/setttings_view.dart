@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gymoraly/views/language_view.dart';
 import 'package:gymoraly/views/notifications_settings_view.dart';
 
 class SettingsView extends StatelessWidget {
@@ -26,7 +27,16 @@ class SettingsView extends StatelessWidget {
                     ),
                   ),
                 ),
-                _buildOption(Icons.language_rounded, "Idioma"),
+                _buildOption(
+                  Icons.language_rounded,
+                  "Idioma",
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const LanguageView(),
+                    ),
+                  ),
+                ),
                 _buildOption(Icons.dark_mode_outlined, "Tema"),
                 _buildOption(Icons.info_outline, "Sobre o App"),
               ],
