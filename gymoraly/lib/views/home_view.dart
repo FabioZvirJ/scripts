@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-// IMPORTANTE: Adicione o import da tela de perfil para a navegação funcionar
+import 'package:flutter/gestures.dart';
 import 'package:gymoraly/views/profile_view.dart'; 
 
 class HomeView extends StatelessWidget {
@@ -30,7 +30,7 @@ class HomeView extends StatelessWidget {
                   ),
                   padding: const EdgeInsets.only(top: 70, left: 25, right: 25), 
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween, // Joga um pra cada ponta!
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween, // Joga um pra cada ponta
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       // 1. ÍCONE DE PERFIL NA ESQUERDA
@@ -174,19 +174,33 @@ class HomeView extends StatelessWidget {
             const SizedBox(height: 190),
 
             // --- SEÇÃO MEUS TREINOS ---
+           // --- SEÇÃO MEUS TREINOS ---
             _buildSectionHeader('Meus treinos'),
             const SizedBox(height: 10),
+            
             SizedBox(
               height: 110,
-              child: ListView(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.only(left: 25, right: 10),
-                children: [
-                  _buildWorkoutCard('Treino A', 'Superior', primaryColor),
-                  _buildWorkoutCard('Treino B', 'Inferior', primaryColor),
-                  _buildWorkoutCard('Treino C', 'Cardio', primaryColor),
-                ],
+              // O ScrollConfiguration ensina o Flutter a aceitar o mouse como se fosse um dedo na tela!
+              child: ScrollConfiguration(
+                behavior: ScrollConfiguration.of(context).copyWith(
+                  dragDevices: {
+                    PointerDeviceKind.touch, // Dedo no celular
+                    PointerDeviceKind.mouse, // Clique e arraste no Windows/Web
+                  },
+                ),
+                child: ListView(
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.only(left: 25, right: 10),
+                  children: [
+                    _buildWorkoutCard('Treino A', 'Superior', primaryColor),
+                    _buildWorkoutCard('Treino B', 'Inferior', primaryColor),
+                    _buildWorkoutCard('Treino C', 'Cardio', primaryColor),
+                    _buildAddWorkoutCard(primaryColor),
+                  ],
+                ),
               ),
+            
+              
             ),
 
             const SizedBox(height: 30),
@@ -242,6 +256,7 @@ class HomeView extends StatelessWidget {
     );
   }
 
+  // Card padrão de treino
   Widget _buildWorkoutCard(String title, String subtitle, Color color) {
     return Container(
       width: 130,
@@ -265,6 +280,47 @@ class HomeView extends StatelessWidget {
             style: TextStyle(color: Colors.grey.shade500, fontSize: 12),
           ),
         ],
+      ),
+    );
+  }
+
+  // Novo card de adicionar treino (com o sinal de +)
+  Widget _buildAddWorkoutCard(Color color) {
+    return GestureDetector(
+      onTap: () {
+        // Ação para criar um novo treino
+        print("Clicou em adicionar treino!");
+      },
+      child: Container(
+        width: 130,
+        margin: const EdgeInsets.only(right: 15),
+        decoration: BoxDecoration(
+          color: color.withOpacity(0.05), // Fundo azul bem clarinho
+          borderRadius: BorderRadius.circular(25),
+          border: Border.all(color: color.withOpacity(0.3), width: 1.5), 
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: color.withOpacity(0.15),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(Icons.add, color: color, size: 26),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Novo treino',
+              style: TextStyle(
+                color: color, 
+                fontWeight: FontWeight.bold, 
+                fontSize: 14
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
