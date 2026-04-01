@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+// IMPORTANTE: Adicione o import da tela de perfil para a navegação funcionar
+import 'package:gymoraly/views/profile_view.dart'; 
 
 class HomeView extends StatelessWidget {
   final String userName;
@@ -26,15 +28,48 @@ class HomeView extends StatelessWidget {
                     color: primaryColor,
                     borderRadius: BorderRadius.vertical(bottom: Radius.circular(40)),
                   ),
-                  padding: const EdgeInsets.only(top: 70, left: 25),
-                  child: Text(
-                    'Olá, $userName 👋',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: -0.5,
-                    ),
+                  // Adicionei 'right: 25' para o ícone não grudar na borda
+                  padding: const EdgeInsets.only(top: 70, left: 25, right: 25), 
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween, // Joga um pra cada lado
+                    children: [
+                      // Texto de Saudação
+                      Text(
+                        'Olá, $userName 👋',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 28,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: -0.5,
+                        ),
+                      ),
+                      
+                      // Ícone de Perfil Clicável
+                      GestureDetector(
+                        onTap: () {
+                          // Navega para a tela de Perfil quando clicado
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => ProfileView(userName: userName),
+                            ),
+                          );
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.all(2), // Bordinha branca opcional
+                          decoration: const BoxDecoration(
+                            color: Colors.white,
+                            shape: BoxShape.circle,
+                          ),
+                          child: const CircleAvatar(
+                            radius: 20,
+                            backgroundColor: Color(0xFFE3F2FD), // Fundo azul bem clarinho
+                            child: Icon(Icons.person, color: primaryColor, size: 24),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
                 
