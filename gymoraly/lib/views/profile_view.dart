@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:gymoraly/views/edit_profile_view.dart';
+import 'package:gymoraly/views/privacy_view.dart';
+import 'package:gymoraly/views/setttings_view.dart';
+import 'package:gymoraly/views/subscriptions_view.dart';
 import '../controllers/profile_controller.dart'; // Importe o seu controller
 
 class ProfileView extends StatelessWidget {
@@ -128,20 +131,21 @@ class ProfileView extends StatelessWidget {
             const SizedBox(height: 40),
 
             // --- OPÇÕES DE MENU ---
+            // Na ProfileView:
             _buildProfileOption(
               Icons.lock_outline,
               'Privacidade',
-              onTap: () => print("Privacidade clicada"),
+              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const PrivacyView())),
             ),
             _buildProfileOption(
               Icons.credit_card_rounded,
               'Assinaturas',
-              onTap: () => print("Assinaturas clicada"),
+              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const SubscriptionsView())),
             ),
             _buildProfileOption(
               Icons.settings_outlined,
               'Configurações',
-              onTap: () => print("Configurações clicada"),
+              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const SettingsView())),
             ),
 
             // Botão Sair
