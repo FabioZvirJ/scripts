@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'package:gymoraly/views/add_workout_view.dart';
-import 'package:gymoraly/views/profile_view.dart'; 
+import 'package:gymoraly/views/profile_view.dart';
+import 'package:gymoraly/views/workout_splits_view.dart';
 
 // 1. Transformamos em StatefulWidget para ter "memória" e guardar os treinos!
 class HomeView extends StatefulWidget {
@@ -247,16 +248,16 @@ class _HomeViewState extends State<HomeView> {
   }
 
   // Recebe o BuildContext para conseguir navegar e consertar o erro!
-  Widget _buildAddWorkoutCard(BuildContext context, Color color) {
+ Widget _buildAddWorkoutCard(BuildContext context, Color color) {
     return GestureDetector(
       onTap: () async {
-        // Aguarda a tela de adicionar retornar um novo treino
+        // AGORA ELE ABRE A NOVA PÁGINA DE DIVISÕES!
         final novoTreino = await Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => const AddWorkoutView()),
+          MaterialPageRoute(builder: (context) => const WorkoutSplitsView()),
         );
 
-        // Se o usuário selecionou um treino, adiciona na lista e recarrega a tela
+        // Quando todo o processo acabar, adiciona na lista da Home
         if (novoTreino != null) {
           setState(() {
             meusTreinos.add(novoTreino);
