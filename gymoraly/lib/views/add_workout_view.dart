@@ -1,47 +1,7 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http; // Importação para usar a internet
 
-// ==========================================
-// SERVIÇO DE API (SIMULADO)
-// ==========================================
-class WorkoutApiService {
-  // Banco de dados simulado (Em um app real, isso viria de um servidor via HTTP)
-  final List<Map<String, String>> _mockDatabase = [
-    {'nome': 'Supino Reto com Barra', 'grupo': 'Peito', 'dificuldade': 'Intermediário'},
-    {'nome': 'Supino Inclinado com Halteres', 'grupo': 'Peito', 'dificuldade': 'Avançado'},
-    {'nome': 'Crucifixo na Máquina', 'grupo': 'Peito', 'dificuldade': 'Iniciante'},
-    {'nome': 'Agachamento Livre', 'grupo': 'Pernas', 'dificuldade': 'Avançado'},
-    {'nome': 'Leg Press 45º', 'grupo': 'Pernas', 'dificuldade': 'Intermediário'},
-    {'nome': 'Cadeira Extensora', 'grupo': 'Pernas', 'dificuldade': 'Iniciante'},
-    {'nome': 'Puxada Frontal', 'grupo': 'Costas', 'dificuldade': 'Iniciante'},
-    {'nome': 'Remada Curvada', 'grupo': 'Costas', 'dificuldade': 'Intermediário'},
-    {'nome': 'Rosca Direta com Barra', 'grupo': 'Bíceps', 'dificuldade': 'Iniciante'},
-    {'nome': 'Rosca Martelo', 'grupo': 'Bíceps', 'dificuldade': 'Iniciante'},
-    {'nome': 'Tríceps Pulley', 'grupo': 'Tríceps', 'dificuldade': 'Iniciante'},
-    {'nome': 'Desenvolvimento com Halteres', 'grupo': 'Ombros', 'dificuldade': 'Intermediário'},
-  ];
-
-  // Função que "finge" ir na internet buscar os dados
-  Future<List<Map<String, String>>> fetchExercises(String query) async {
-    await Future.delayed(const Duration(milliseconds: 800)); // Simula o tempo da internet
-
-    if (query.isEmpty) {
-      return _mockDatabase; // Retorna tudo se não tiver pesquisa
-    }
-
-    // Filtra a lista pelo texto digitado
-    return _mockDatabase.where((exercise) {
-      final nome = exercise['nome']!.toLowerCase();
-      final grupo = exercise['grupo']!.toLowerCase();
-      final pesquisa = query.toLowerCase();
-      
-      return nome.contains(pesquisa) || grupo.contains(pesquisa);
-    }).toList();
-  }
-}
-
-// ==========================================
-// TELA PRINCIPAL
-// ==========================================
 class AddWorkoutView extends StatefulWidget {
   const AddWorkoutView({super.key});
 
@@ -50,29 +10,73 @@ class AddWorkoutView extends StatefulWidget {
 }
 
 class _AddWorkoutViewState extends State<AddWorkoutView> {
-  final WorkoutApiService _apiService = WorkoutApiService();
-  List<Map<String, String>> _exercises = [];
+  List<dynamic> _allExercises = []; // Guarda todos os exercícios baixados
+  List<dynamic> _filteredExercises = []; // Guarda os exercícios filtrados pela pesquisa
   bool _isLoading = true;
+  bool _hasError = false;
   final TextEditingController _searchController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    _loadExercises(''); // Carrega a lista inicial ao abrir a tela
+    _fetchExercisesFromApi(); // Chama a API assim que a tela abre
   }
 
-  // Função para chamar a API
-  void _loadExercises(String query) async {
+  // ==========================================
+  // FUNÇÃO QUE CONECTA NA WGER API
+  // ==========================================
+  Future<void> _fetchExercisesFromApi() async {
     setState(() {
       _isLoading = true;
+      _hasError = false;
     });
 
-    final results = await _apiService.fetchExercises(query);
+    try {
+      // Endpoint da Wger API (language=2 é Inglês, limit=50 para não pesar muito)
+      final url = Uri.parse('https://wger.de/api/v2/exercise/?language=2&limit=50');
+      
+      // Fazendo o GET na internet
+      final response = await http.get(url);
 
-    setState(() {
-      _exercises = results;
-      _isLoading = false;
-    });
+      if (response.statusCode == 200) {
+        // Se a internet respondeu "OK" (200), vamos decodificar o JSON
+        final data = json.decode(response.body);
+        
+        setState(() {
+          _allExercises = data['results']; // 'results' é onde a Wger guarda a lista
+          _filteredExercises = _allExercises; // Inicialmente, mostra todos
+          _isLoading = false;
+        });
+      } else {
+        setState(() {
+          _hasError = true;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      // Cai aqui se estiver sem internet, por exemplo
+      setState(() {
+        _hasError = true;
+        _isLoading = false;
+      });
+      print("Erro ao buscar na API: $e");
+    }
+  }
+
+  // Função para filtrar a lista no celular (sem gastar dados da API toda hora)
+  void _filterExercises(String query) {
+    if (query.isEmpty) {
+      setState(() {
+        _filteredExercises = _allExercises;
+      });
+    } else {
+      setState(() {
+        _filteredExercises = _allExercises.where((exercise) {
+          final name = exercise['name'].toString().toLowerCase();
+          return name.contains(query.toLowerCase());
+        }).toList();
+      });
+    }
   }
 
   @override
@@ -90,7 +94,7 @@ class _AddWorkoutViewState extends State<AddWorkoutView> {
           onPressed: () => Navigator.pop(context),
         ),
         title: const Text(
-          'Novo Treino',
+          'Adicionar Exercício',
           style: TextStyle(color: Colors.black87, fontWeight: FontWeight.bold),
         ),
       ),
@@ -107,12 +111,9 @@ class _AddWorkoutViewState extends State<AddWorkoutView> {
               ),
               child: TextField(
                 controller: _searchController,
-                onChanged: (value) {
-                  // Chama a API a cada letra digitada
-                  _loadExercises(value);
-                },
+                onChanged: _filterExercises, // Filtra enquanto digita
                 decoration: InputDecoration(
-                  hintText: 'Buscar exercícios (ex: Peito, Agachamento)',
+                  hintText: 'Buscar exercícios (ex: Curl, Press)',
                   hintStyle: TextStyle(color: Colors.grey.shade500, fontSize: 15),
                   prefixIcon: Icon(Icons.search, color: Colors.grey.shade500),
                   border: InputBorder.none,
@@ -122,36 +123,53 @@ class _AddWorkoutViewState extends State<AddWorkoutView> {
             ),
           ),
 
-          // --- LISTA DE RESULTADOS ---
+          // --- LISTA DE RESULTADOS DA API ---
           Expanded(
             child: _isLoading
                 ? const Center(
-                    // Mostra a bolinha girando enquanto "baixa" os dados
-                    child: CircularProgressIndicator(color: primaryColor),
+                    child: CircularProgressIndicator(color: primaryColor), // Carregando...
                   )
-                : _exercises.isEmpty
+                : _hasError
                     ? Center(
-                        child: Text(
-                          'Nenhum exercício encontrado 😕',
-                          style: TextStyle(color: Colors.grey.shade500, fontSize: 16),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Icon(Icons.wifi_off, size: 50, color: Colors.grey),
+                            const SizedBox(height: 10),
+                            const Text('Erro ao conectar na API.', style: TextStyle(color: Colors.grey)),
+                            TextButton(
+                              onPressed: _fetchExercisesFromApi,
+                              child: const Text('Tentar novamente'),
+                            )
+                          ],
                         ),
                       )
-                    : ListView.builder(
-                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                        itemCount: _exercises.length,
-                        itemBuilder: (context, index) {
-                          final exercise = _exercises[index];
-                          return _buildExerciseCard(exercise, primaryColor);
-                        },
-                      ),
+                    : _filteredExercises.isEmpty
+                        ? Center(
+                            child: Text(
+                              'Nenhum exercício encontrado 😕',
+                              style: TextStyle(color: Colors.grey.shade500, fontSize: 16),
+                            ),
+                          )
+                        : ListView.builder(
+                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                            itemCount: _filteredExercises.length,
+                            itemBuilder: (context, index) {
+                              final exercise = _filteredExercises[index];
+                              return _buildExerciseCard(exercise, primaryColor);
+                            },
+                          ),
           ),
         ],
       ),
     );
   }
 
-  // --- CARD DE EXERCÍCIO INDIVIDUAL ---
-  Widget _buildExerciseCard(Map<String, String> exercise, Color primaryColor) {
+  // --- CARD DE EXERCÍCIO DA API ---
+  Widget _buildExerciseCard(dynamic exercise, Color primaryColor) {
+    // A Wger retorna o nome do exercício no campo 'name'
+    String nomeExercicio = exercise['name'] ?? 'Nome desconhecido';
+
     return Container(
       margin: const EdgeInsets.only(bottom: 15),
       padding: const EdgeInsets.all(15),
@@ -180,22 +198,15 @@ class _AddWorkoutViewState extends State<AddWorkoutView> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  exercise['nome']!,
+                  nomeExercicio,
                   style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 5),
-                Row(
-                  children: [
-                    Text(
-                      exercise['grupo']!,
-                      style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
-                    ),
-                    const Text(' • ', style: TextStyle(color: Colors.grey)),
-                    Text(
-                      exercise['dificuldade']!,
-                      style: TextStyle(color: primaryColor, fontSize: 13, fontWeight: FontWeight.w500),
-                    ),
-                  ],
+                Text(
+                  'Banco de Dados Wger', // A API Wger retorna IDs de categoria, não nomes, então deixei genérico
+                  style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
                 ),
               ],
             ),
@@ -206,8 +217,14 @@ class _AddWorkoutViewState extends State<AddWorkoutView> {
             icon: const Icon(Icons.add_circle_outline, size: 28),
             color: primaryColor,
             onPressed: () {
-              // FECHA A TELA E MANDA O EXERCÍCIO DE VOLTA PRA HOME!
-              Navigator.pop(context, exercise);
+              // Devolve um mapa limpo para a tela anterior
+              Map<String, String> exercicioEscolhido = {
+                'nome': nomeExercicio,
+                'grupo': 'Exercício API'
+              };
+              
+              // Fecha a tela e manda os dados
+              Navigator.pop(context, exercicioEscolhido);
             },
           ),
         ],
