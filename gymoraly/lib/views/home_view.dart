@@ -1,10 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
+import 'package:gymoraly/views/add_workout_view.dart';
 import 'package:gymoraly/views/profile_view.dart'; 
 
-class HomeView extends StatelessWidget {
+// 1. Transformamos em StatefulWidget para ter "memória" e guardar os treinos!
+class HomeView extends StatefulWidget {
   final String userName;
   const HomeView({super.key, required this.userName});
+
+  @override
+  State<HomeView> createState() => _HomeViewState();
+}
+
+class _HomeViewState extends State<HomeView> {
+  // 2. Lista dinâmica que começa vazia!
+  List<Map<String, String>> meusTreinos = [];
 
   @override
   Widget build(BuildContext context) {
@@ -20,7 +30,6 @@ class HomeView extends StatelessWidget {
             Stack(
               clipBehavior: Clip.none,
               children: [
-                // Fundo Azul Arredondado
                 Container(
                   height: 240,
                   width: double.infinity,
@@ -30,11 +39,9 @@ class HomeView extends StatelessWidget {
                   ),
                   padding: const EdgeInsets.only(top: 70, left: 25, right: 25), 
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween, // Joga um pra cada ponta
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // 1. ÍCONE DE PERFIL NA ESQUERDA
-                      // MouseRegion faz o cursor virar a "mãozinha" de clique
                       MouseRegion(
                         cursor: SystemMouseCursors.click,
                         child: GestureDetector(
@@ -42,12 +49,12 @@ class HomeView extends StatelessWidget {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => ProfileView(userName: userName),
+                                builder: (context) => ProfileView(userName: widget.userName),
                               ),
                             );
                           },
                           child: Container(
-                            padding: const EdgeInsets.all(2), // Bordinha branca
+                            padding: const EdgeInsets.all(2),
                             decoration: const BoxDecoration(
                               color: Colors.white,
                               shape: BoxShape.circle,
@@ -60,14 +67,11 @@ class HomeView extends StatelessWidget {
                           ),
                         ),
                       ),
-
-                      const SizedBox(width: 15), // Espaço de segurança
-
-                      // 2. TEXTO DE SAUDAÇÃO NA DIREITA
+                      const SizedBox(width: 15),
                       Flexible(
                         child: Text(
-                          'Olá, $userName 👋',
-                          textAlign: TextAlign.right, // Alinha o texto na direita
+                          'Olá, ${widget.userName} 👋',
+                          textAlign: TextAlign.right,
                           style: const TextStyle(
                             color: Colors.white,
                             fontSize: 28,
@@ -82,7 +86,6 @@ class HomeView extends StatelessWidget {
                   ),
                 ),
                 
-                // Card Branco de Objetivo (Posicionado entre o azul e o cinza)
                 Positioned(
                   top: 140,
                   left: 20,
@@ -103,17 +106,9 @@ class HomeView extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
-                          'Objetivo',
-                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                        ),
-                        const Text(
-                          '45 min de treino',
-                          style: TextStyle(fontSize: 15, color: Colors.grey),
-                        ),
+                        const Text('Objetivo', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                        const Text('45 min de treino', style: TextStyle(fontSize: 15, color: Colors.grey)),
                         const SizedBox(height: 20),
-                        
-                        // Bloco de Miniatura do Exercício
                         Row(
                           children: [
                             Container(
@@ -129,21 +124,13 @@ class HomeView extends StatelessWidget {
                             const Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(
-                                  'Último treinado',
-                                  style: TextStyle(color: Colors.grey, fontSize: 12),
-                                ),
-                                Text(
-                                  'Peito e Bíceps',
-                                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                                ),
+                                Text('Último treinado', style: TextStyle(color: Colors.grey, fontSize: 12)),
+                                Text('Peito e Bíceps', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                               ],
                             )
                           ],
                         ),
                         const SizedBox(height: 20),
-                        
-                        // Botão Continuar
                         SizedBox(
                           width: double.infinity,
                           height: 55,
@@ -153,14 +140,9 @@ class HomeView extends StatelessWidget {
                               backgroundColor: primaryColor,
                               foregroundColor: Colors.white,
                               elevation: 0,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(15),
-                              ),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
                             ),
-                            child: const Text(
-                              'Continuar treino',
-                              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                            ),
+                            child: const Text('Continuar treino', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                           ),
                         )
                       ],
@@ -170,37 +152,30 @@ class HomeView extends StatelessWidget {
               ],
             ),
 
-            // Espaço necessário para compensar o Positioned (Card)
             const SizedBox(height: 190),
 
             // --- SEÇÃO MEUS TREINOS ---
-           // --- SEÇÃO MEUS TREINOS ---
             _buildSectionHeader('Meus treinos'),
             const SizedBox(height: 10),
             
             SizedBox(
               height: 110,
-              // O ScrollConfiguration ensina o Flutter a aceitar o mouse como se fosse um dedo na tela!
               child: ScrollConfiguration(
                 behavior: ScrollConfiguration.of(context).copyWith(
-                  dragDevices: {
-                    PointerDeviceKind.touch, // Dedo no celular
-                    PointerDeviceKind.mouse, // Clique e arraste no Windows/Web
-                  },
+                  dragDevices: { PointerDeviceKind.touch, PointerDeviceKind.mouse },
                 ),
                 child: ListView(
                   scrollDirection: Axis.horizontal,
                   padding: const EdgeInsets.only(left: 25, right: 10),
                   children: [
-                    _buildWorkoutCard('Treino A', 'Superior', primaryColor),
-                    _buildWorkoutCard('Treino B', 'Inferior', primaryColor),
-                    _buildWorkoutCard('Treino C', 'Cardio', primaryColor),
-                    _buildAddWorkoutCard(primaryColor),
+                    // 3. Mapeia a lista real do usuário para gerar os cards dinamicamente
+                    ...meusTreinos.map((treino) => _buildWorkoutCard(treino['nome']!, treino['grupo']!, primaryColor)).toList(),
+                    
+                    // Botão de adicionar fica sempre no final da lista, passando o 'context' agora
+                    _buildAddWorkoutCard(context, primaryColor),
                   ],
                 ),
               ),
-            
-              
             ),
 
             const SizedBox(height: 30),
@@ -218,10 +193,7 @@ class HomeView extends StatelessWidget {
                   border: Border.all(color: Colors.grey.shade200),
                 ),
                 child: const Center(
-                  child: Text(
-                    "Conteúdo da comunidade em breve...",
-                    style: TextStyle(color: Colors.grey),
-                  ),
+                  child: Text("Conteúdo da comunidade em breve...", style: TextStyle(color: Colors.grey)),
                 ),
               ),
             ),
@@ -240,23 +212,16 @@ class HomeView extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
-            title,
-            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-          ),
+          Text(title, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
           TextButton(
             onPressed: () {},
-            child: const Text(
-              'Ver tudo',
-              style: TextStyle(color: Color(0xFF2196F3), fontWeight: FontWeight.bold),
-            ),
+            child: const Text('Ver tudo', style: TextStyle(color: Color(0xFF2196F3), fontWeight: FontWeight.bold)),
           ),
         ],
       ),
     );
   }
 
-  // Card padrão de treino
   Widget _buildWorkoutCard(String title, String subtitle, Color color) {
     return Container(
       width: 130,
@@ -271,31 +236,38 @@ class HomeView extends StatelessWidget {
         children: [
           Icon(Icons.bolt_rounded, color: color, size: 28),
           const SizedBox(height: 5),
-          Text(
-            title,
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            child: Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14), textAlign: TextAlign.center, maxLines: 1, overflow: TextOverflow.ellipsis),
           ),
-          Text(
-            subtitle,
-            style: TextStyle(color: Colors.grey.shade500, fontSize: 12),
-          ),
+          Text(subtitle, style: TextStyle(color: Colors.grey.shade500, fontSize: 12)),
         ],
       ),
     );
   }
 
-  // Novo card de adicionar treino (com o sinal de +)
-  Widget _buildAddWorkoutCard(Color color) {
+  // Recebe o BuildContext para conseguir navegar e consertar o erro!
+  Widget _buildAddWorkoutCard(BuildContext context, Color color) {
     return GestureDetector(
-      onTap: () {
-        // Ação para criar um novo treino
-        print("Clicou em adicionar treino!");
+      onTap: () async {
+        // Aguarda a tela de adicionar retornar um novo treino
+        final novoTreino = await Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const AddWorkoutView()),
+        );
+
+        // Se o usuário selecionou um treino, adiciona na lista e recarrega a tela
+        if (novoTreino != null) {
+          setState(() {
+            meusTreinos.add(novoTreino);
+          });
+        }
       },
       child: Container(
         width: 130,
         margin: const EdgeInsets.only(right: 15),
         decoration: BoxDecoration(
-          color: color.withOpacity(0.05), // Fundo azul bem clarinho
+          color: color.withOpacity(0.05),
           borderRadius: BorderRadius.circular(25),
           border: Border.all(color: color.withOpacity(0.3), width: 1.5), 
         ),
@@ -304,21 +276,11 @@ class HomeView extends StatelessWidget {
           children: [
             Container(
               padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: color.withOpacity(0.15),
-                shape: BoxShape.circle,
-              ),
+              decoration: BoxDecoration(color: color.withOpacity(0.15), shape: BoxShape.circle),
               child: Icon(Icons.add, color: color, size: 26),
             ),
             const SizedBox(height: 8),
-            Text(
-              'Novo treino',
-              style: TextStyle(
-                color: color, 
-                fontWeight: FontWeight.bold, 
-                fontSize: 14
-              ),
-            ),
+            Text('Novo treino', style: TextStyle(color: color, fontWeight: FontWeight.bold, fontSize: 14)),
           ],
         ),
       ),
