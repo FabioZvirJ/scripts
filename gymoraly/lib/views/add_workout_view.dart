@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http; // Importação para usar a internet
+import 'package:http/http.dart' as http; 
 
 class AddWorkoutView extends StatefulWidget {
   const AddWorkoutView({super.key});
@@ -10,8 +10,8 @@ class AddWorkoutView extends StatefulWidget {
 }
 
 class _AddWorkoutViewState extends State<AddWorkoutView> {
-  List<dynamic> _allExercises = []; // Guarda todos os exercícios baixados
-  List<dynamic> _filteredExercises = []; // Guarda os exercícios filtrados pela pesquisa
+  List<dynamic> _allExercises = []; 
+  List<dynamic> _filteredExercises = []; 
   bool _isLoading = true;
   bool _hasError = false;
   final TextEditingController _searchController = TextEditingController();
@@ -19,11 +19,11 @@ class _AddWorkoutViewState extends State<AddWorkoutView> {
   @override
   void initState() {
     super.initState();
-    _fetchExercisesFromApi(); // Chama a API assim que a tela abre
+    _fetchExercisesFromApi(); 
   }
 
   // ==========================================
-  // FUNÇÃO QUE CONECTA NA WGER API
+  // FUNÇÃO QUE CONECTA NA WGER API (CORRIGIDA)
   // ==========================================
   Future<void> _fetchExercisesFromApi() async {
     setState(() {
@@ -32,19 +32,17 @@ class _AddWorkoutViewState extends State<AddWorkoutView> {
     });
 
     try {
-      // Endpoint da Wger API (language=2 é Inglês, limit=50 para não pesar muito)
-      final url = Uri.parse('https://wger.de/api/v2/exercise/?language=2&limit=50');
+      // MUDANÇA AQUI: Usando o endpoint /exerciseinfo/ que traz os nomes legíveis!
+      final url = Uri.parse('https://wger.de/api/v2/exerciseinfo/?language=2&limit=50');
       
-      // Fazendo o GET na internet
       final response = await http.get(url);
 
       if (response.statusCode == 200) {
-        // Se a internet respondeu "OK" (200), vamos decodificar o JSON
         final data = json.decode(response.body);
         
         setState(() {
-          _allExercises = data['results']; // 'results' é onde a Wger guarda a lista
-          _filteredExercises = _allExercises; // Inicialmente, mostra todos
+          _allExercises = data['results']; 
+          _filteredExercises = _allExercises; 
           _isLoading = false;
         });
       } else {
@@ -54,7 +52,6 @@ class _AddWorkoutViewState extends State<AddWorkoutView> {
         });
       }
     } catch (e) {
-      // Cai aqui se estiver sem internet, por exemplo
       setState(() {
         _hasError = true;
         _isLoading = false;
@@ -63,7 +60,6 @@ class _AddWorkoutViewState extends State<AddWorkoutView> {
     }
   }
 
-  // Função para filtrar a lista no celular (sem gastar dados da API toda hora)
   void _filterExercises(String query) {
     if (query.isEmpty) {
       setState(() {
@@ -72,7 +68,8 @@ class _AddWorkoutViewState extends State<AddWorkoutView> {
     } else {
       setState(() {
         _filteredExercises = _allExercises.where((exercise) {
-          final name = exercise['name'].toString().toLowerCase();
+          // Garante que não vai dar erro se o nome vier nulo
+          final name = (exercise['name'] ?? '').toString().toLowerCase();
           return name.contains(query.toLowerCase());
         }).toList();
       });
@@ -100,7 +97,6 @@ class _AddWorkoutViewState extends State<AddWorkoutView> {
       ),
       body: Column(
         children: [
-          // --- BARRA DE PESQUISA ---
           Container(
             color: Colors.white,
             padding: const EdgeInsets.all(20),
@@ -111,7 +107,7 @@ class _AddWorkoutViewState extends State<AddWorkoutView> {
               ),
               child: TextField(
                 controller: _searchController,
-                onChanged: _filterExercises, // Filtra enquanto digita
+                onChanged: _filterExercises,
                 decoration: InputDecoration(
                   hintText: 'Buscar exercícios (ex: Curl, Press)',
                   hintStyle: TextStyle(color: Colors.grey.shade500, fontSize: 15),
@@ -123,11 +119,10 @@ class _AddWorkoutViewState extends State<AddWorkoutView> {
             ),
           ),
 
-          // --- LISTA DE RESULTADOS DA API ---
           Expanded(
             child: _isLoading
                 ? const Center(
-                    child: CircularProgressIndicator(color: primaryColor), // Carregando...
+                    child: CircularProgressIndicator(color: primaryColor), 
                   )
                 : _hasError
                     ? Center(
@@ -165,10 +160,15 @@ class _AddWorkoutViewState extends State<AddWorkoutView> {
     );
   }
 
-  // --- CARD DE EXERCÍCIO DA API ---
   Widget _buildExerciseCard(dynamic exercise, Color primaryColor) {
-    // A Wger retorna o nome do exercício no campo 'name'
-    String nomeExercicio = exercise['name'] ?? 'Nome desconhecido';
+    // Agora o campo 'name' vai existir!
+    String nomeExercicio = exercise['name'] ?? 'Exercício sem nome';
+    
+    // Na Wger Info, a categoria é um objeto que contém o nome (ex: "Arms", "Legs")
+    String nomeCategoria = 'Músculo indefinido';
+    if (exercise['category'] != null && exercise['category']['name'] != null) {
+      nomeCategoria = exercise['category']['name'];
+    }
 
     return Container(
       margin: const EdgeInsets.only(bottom: 15),
@@ -180,7 +180,6 @@ class _AddWorkoutViewState extends State<AddWorkoutView> {
       ),
       child: Row(
         children: [
-          // Ícone do exercício
           Container(
             width: 50,
             height: 50,
@@ -192,7 +191,6 @@ class _AddWorkoutViewState extends State<AddWorkoutView> {
           ),
           const SizedBox(width: 15),
           
-          // Textos
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -205,25 +203,22 @@ class _AddWorkoutViewState extends State<AddWorkoutView> {
                 ),
                 const SizedBox(height: 5),
                 Text(
-                  'Banco de Dados Wger', // A API Wger retorna IDs de categoria, não nomes, então deixei genérico
+                  nomeCategoria, // Agora mostra se é braço, perna, peito (em inglês)
                   style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
                 ),
               ],
             ),
           ),
           
-          // Botão Adicionar
           IconButton(
             icon: const Icon(Icons.add_circle_outline, size: 28),
             color: primaryColor,
             onPressed: () {
-              // Devolve um mapa limpo para a tela anterior
               Map<String, String> exercicioEscolhido = {
                 'nome': nomeExercicio,
-                'grupo': 'Exercício API'
+                'grupo': nomeCategoria // Manda a categoria pro card da Home
               };
               
-              // Fecha a tela e manda os dados
               Navigator.pop(context, exercicioEscolhido);
             },
           ),
