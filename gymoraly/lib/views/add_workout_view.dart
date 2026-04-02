@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http; 
+import 'package:http/http.dart' as http;
 
 class AddWorkoutView extends StatefulWidget {
   const AddWorkoutView({super.key});
@@ -10,8 +10,8 @@ class AddWorkoutView extends StatefulWidget {
 }
 
 class _AddWorkoutViewState extends State<AddWorkoutView> {
-  List<dynamic> _allExercises = []; 
-  List<dynamic> _filteredExercises = []; 
+  List<dynamic> _allExercises = [];
+  List<dynamic> _filteredExercises = [];
   bool _isLoading = true;
   bool _hasError = false;
   final TextEditingController _searchController = TextEditingController();
@@ -19,11 +19,11 @@ class _AddWorkoutViewState extends State<AddWorkoutView> {
   @override
   void initState() {
     super.initState();
-    _fetchExercisesFromApi(); 
+    _fetchExercisesFromApi();
   }
 
   // ==========================================
-  // FUNÇÃO QUE CONECTA NA WGER API (CORRIGIDA)
+  // FUNÇÃO QUE CONECTA NA API (CORRIGIDA COM SEU PRINT)
   // ==========================================
   Future<void> _fetchExercisesFromApi() async {
     setState(() {
@@ -32,19 +32,31 @@ class _AddWorkoutViewState extends State<AddWorkoutView> {
     });
 
     try {
-      // MUDANÇA AQUI: Usando o endpoint /exerciseinfo/ que traz os nomes legíveis!
-      final url = Uri.parse('https://wger.de/api/v2/exerciseinfo/?language=2&limit=50');
-      
+      // Usando o limite de 150 para carregar rápido
+      final url = Uri.parse('https://www.exercisedb.dev/api/v1/exercises');
+
       final response = await http.get(url);
 
       if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        
-        setState(() {
-          _allExercises = data['results']; 
-          _filteredExercises = _allExercises; 
-          _isLoading = false;
-        });
+        // Lendo o objeto principal que vimos no print
+        final Map<String, dynamic> jsonResponse = json.decode(response.body);
+
+        // Verifica se deu "success": true
+        if (jsonResponse['success'] == true) {
+          // Pega a lista que está dentro da chave "data"
+          final List<dynamic> data = jsonResponse['data'];
+
+          setState(() {
+            // Dá uma embaralhada na lista para não mostrar só o mesmo grupo muscular!
+            data.shuffle();
+
+            _allExercises = data;
+            _filteredExercises = _allExercises;
+            _isLoading = false;
+          });
+        } else {
+          throw Exception("API retornou success: false");
+        }
       } else {
         setState(() {
           _hasError = true;
@@ -60,6 +72,7 @@ class _AddWorkoutViewState extends State<AddWorkoutView> {
     }
   }
 
+  // Filtra em tempo real
   void _filterExercises(String query) {
     if (query.isEmpty) {
       setState(() {
@@ -68,11 +81,48 @@ class _AddWorkoutViewState extends State<AddWorkoutView> {
     } else {
       setState(() {
         _filteredExercises = _allExercises.where((exercise) {
-          // Garante que não vai dar erro se o nome vier nulo
           final name = (exercise['name'] ?? '').toString().toLowerCase();
-          return name.contains(query.toLowerCase());
+
+          // Como 'bodyParts' é uma lista (ex: ["back"]), pegamos o primeiro item com segurança
+          final bodyPartsList = exercise['bodyParts'] as List<dynamic>? ?? [];
+          final bodyPart = bodyPartsList.isNotEmpty
+              ? bodyPartsList.first.toString().toLowerCase()
+              : '';
+
+          return name.contains(query.toLowerCase()) ||
+              bodyPart.contains(query.toLowerCase());
         }).toList();
       });
+    }
+  }
+
+  // ==========================================
+  // TRADUTOR DE GRUPOS MUSCULARES
+  // ==========================================
+  String _traduzirGrupo(String bodyPartIngles) {
+    switch (bodyPartIngles.toLowerCase()) {
+      case 'back':
+        return 'Costas';
+      case 'cardio':
+        return 'Cardio';
+      case 'chest':
+        return 'Peito';
+      case 'lower arms':
+        return 'Antebraços';
+      case 'lower legs':
+        return 'Panturrilhas';
+      case 'neck':
+        return 'Pescoço';
+      case 'shoulders':
+        return 'Ombros';
+      case 'upper arms':
+        return 'Braços';
+      case 'upper legs':
+        return 'Pernas';
+      case 'waist':
+        return 'Abdômen';
+      default:
+        return bodyPartIngles;
     }
   }
 
@@ -109,8 +159,11 @@ class _AddWorkoutViewState extends State<AddWorkoutView> {
                 controller: _searchController,
                 onChanged: _filterExercises,
                 decoration: InputDecoration(
-                  hintText: 'Buscar exercícios (ex: Curl, Press)',
-                  hintStyle: TextStyle(color: Colors.grey.shade500, fontSize: 15),
+                  hintText: 'Buscar exercícios (ex: press, curl, pernas)',
+                  hintStyle: TextStyle(
+                    color: Colors.grey.shade500,
+                    fontSize: 15,
+                  ),
                   prefixIcon: Icon(Icons.search, color: Colors.grey.shade500),
                   border: InputBorder.none,
                   contentPadding: const EdgeInsets.symmetric(vertical: 15),
@@ -122,38 +175,51 @@ class _AddWorkoutViewState extends State<AddWorkoutView> {
           Expanded(
             child: _isLoading
                 ? const Center(
-                    child: CircularProgressIndicator(color: primaryColor), 
+                    child: CircularProgressIndicator(color: primaryColor),
                   )
                 : _hasError
-                    ? Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Icon(Icons.wifi_off, size: 50, color: Colors.grey),
-                            const SizedBox(height: 10),
-                            const Text('Erro ao conectar na API.', style: TextStyle(color: Colors.grey)),
-                            TextButton(
-                              onPressed: _fetchExercisesFromApi,
-                              child: const Text('Tentar novamente'),
-                            )
-                          ],
+                ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(
+                          Icons.wifi_off,
+                          size: 50,
+                          color: Colors.grey,
                         ),
-                      )
-                    : _filteredExercises.isEmpty
-                        ? Center(
-                            child: Text(
-                              'Nenhum exercício encontrado 😕',
-                              style: TextStyle(color: Colors.grey.shade500, fontSize: 16),
-                            ),
-                          )
-                        : ListView.builder(
-                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                            itemCount: _filteredExercises.length,
-                            itemBuilder: (context, index) {
-                              final exercise = _filteredExercises[index];
-                              return _buildExerciseCard(exercise, primaryColor);
-                            },
-                          ),
+                        const SizedBox(height: 10),
+                        const Text(
+                          'Erro ao conectar na API.',
+                          style: TextStyle(color: Colors.grey),
+                        ),
+                        TextButton(
+                          onPressed: _fetchExercisesFromApi,
+                          child: const Text('Tentar novamente'),
+                        ),
+                      ],
+                    ),
+                  )
+                : _filteredExercises.isEmpty
+                ? Center(
+                    child: Text(
+                      'Nenhum exercício encontrado 😕',
+                      style: TextStyle(
+                        color: Colors.grey.shade500,
+                        fontSize: 16,
+                      ),
+                    ),
+                  )
+                : ListView.builder(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 10,
+                    ),
+                    itemCount: _filteredExercises.length,
+                    itemBuilder: (context, index) {
+                      final exercise = _filteredExercises[index];
+                      return _buildExerciseCard(exercise, primaryColor);
+                    },
+                  ),
           ),
         ],
       ),
@@ -161,13 +227,14 @@ class _AddWorkoutViewState extends State<AddWorkoutView> {
   }
 
   Widget _buildExerciseCard(dynamic exercise, Color primaryColor) {
-    // Agora o campo 'name' vai existir!
     String nomeExercicio = exercise['name'] ?? 'Exercício sem nome';
-    
-    // Na Wger Info, a categoria é um objeto que contém o nome (ex: "Arms", "Legs")
-    String nomeCategoria = 'Músculo indefinido';
-    if (exercise['category'] != null && exercise['category']['name'] != null) {
-      nomeCategoria = exercise['category']['name'];
+    String gifUrl = exercise['gifUrl'] ?? '';
+
+    // Lê a lista de bodyParts corretamente
+    List<dynamic> bodyPartsList = exercise['bodyParts'] ?? [];
+    String nomeCategoria = 'Geral';
+    if (bodyPartsList.isNotEmpty) {
+      nomeCategoria = _traduzirGrupo(bodyPartsList.first.toString());
     }
 
     return Container(
@@ -180,45 +247,65 @@ class _AddWorkoutViewState extends State<AddWorkoutView> {
       ),
       child: Row(
         children: [
+          // GIF DO EXERCÍCIO
           Container(
-            width: 50,
-            height: 50,
+            width: 60,
+            height: 60,
             decoration: BoxDecoration(
-              color: primaryColor.withOpacity(0.1),
+              color: Colors.white,
               borderRadius: BorderRadius.circular(15),
+              border: Border.all(color: Colors.grey.shade100),
             ),
-            child: Icon(Icons.fitness_center, color: primaryColor),
+            clipBehavior: Clip.antiAlias,
+            child: gifUrl.isNotEmpty
+                ? Image.network(
+                    gifUrl,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) =>
+                        Icon(Icons.fitness_center, color: primaryColor),
+                  )
+                : Icon(Icons.fitness_center, color: primaryColor),
           ),
           const SizedBox(width: 15),
-          
+
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  nomeExercicio,
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                  // Deixa a primeira letra maiúscula
+                  nomeExercicio.isNotEmpty
+                      ? nomeExercicio[0].toUpperCase() +
+                            nomeExercicio.substring(1)
+                      : '',
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
+                  ),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 5),
                 Text(
-                  nomeCategoria, // Agora mostra se é braço, perna, peito (em inglês)
-                  style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
+                  nomeCategoria,
+                  style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
                 ),
               ],
             ),
           ),
-          
+
           IconButton(
             icon: const Icon(Icons.add_circle_outline, size: 28),
             color: primaryColor,
             onPressed: () {
               Map<String, String> exercicioEscolhido = {
-                'nome': nomeExercicio,
-                'grupo': nomeCategoria // Manda a categoria pro card da Home
+                'nome': nomeExercicio.isNotEmpty
+                    ? nomeExercicio[0].toUpperCase() +
+                          nomeExercicio.substring(1)
+                    : '',
+                'grupo': nomeCategoria,
               };
-              
+
               Navigator.pop(context, exercicioEscolhido);
             },
           ),
